@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type { TrackResult } from "./ProductSiteContext";
 import { Modal } from "./Modal";
 import { useProductSite } from "./ProductSiteContext";
 
@@ -13,8 +14,9 @@ export function SiteModals() {
     cartCount,
     removeFromCart,
     updateQuantity,
-    clearCart,
+    checkout,
     login,
+    register,
     trackOrder,
     searchQuery,
     setSearchQuery,
@@ -25,12 +27,32 @@ export function SiteModals() {
 
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
-  const [loginError, setLoginError] = useState("");
+  const [signupName, setSignupName] = useState("");
+  const [signupEmail, setSignupEmail] = useState("");
+  const [signupPassword, setSignupPassword] = useState("");
+  const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
+  const [authError, setAuthError] = useState("");
   const [trackId, setTrackId] = useState("");
   const [trackEmail, setTrackEmail] = useState("");
-  const [trackResult, setTrackResult] = useState<ReturnType<typeof trackOrder>>(null);
+  const [trackResult, setTrackResult] = useState<TrackResult | null>(null);
+  const [checkoutEmail, setCheckoutEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+
+  useEffect(() => {
+    if (activeModal !== "login") return;
+    setAuthError("");
+    if (!user) {
+      setAuthMode("signin");
+    }
+  }, [activeModal, user]);
+
+  useEffect(() => {
+    if (activeModal === "cart" && user?.email) {
+      setCheckoutEmail(user.email);
+    }
+  }, [activeModal, user?.email]);
 
   const policyContent: Record<string, { title: string; body: string }> = {
     refund: {
@@ -53,16 +75,24 @@ export function SiteModals() {
 
   return (
     <>
-      <Modal open={activeModal === "login"} onClose={closeModal} title="Log in">
+      <Modal
+        open={activeModal === "login"}
+        onClose={closeModal}
+        title={user ? "My account" : authMode === "signup" ? "Create account" : "Sign in"}
+      >
         {user ? (
-          <div className="space-y-4 text-center">
-            <p className="ps-text-muted">
-              Signed in as <strong className="ps-text">{user.email}</strong>
+          <div className="space-y-4">
+            <div className="ps-highlight rounded-lg p-4 text-center">
+              <p className="ps-text text-lg font-semibold">{user.name}</p>
+              <p className="ps-text-muted mt-1 text-sm">{user.email}</p>
+            </div>
+            <p className="ps-text-muted text-center text-sm">
+              Your cart and session are saved for this store.
             </p>
             <button
               type="button"
               onClick={() => {
-                logout();
+                void logout();
                 closeModal();
               }}
               className="ps-btn w-full rounded-sm py-3 text-sm font-semibold"
@@ -71,52 +101,175 @@ export function SiteModals() {
             </button>
           </div>
         ) : (
-          <form
-            className="space-y-4"
-            onSubmit={(e) => {
-              e.preventDefault();
-              const result = login(loginEmail, loginPassword);
-              if (!result.ok) setLoginError(result.error ?? "Login failed");
-              else setLoginError("");
-            }}
-          >
-            {loginError && (
-              <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
-                {loginError}
-              </p>
+          <>
+            <div className="mb-4 flex rounded-lg border ps-border p-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthMode("signin");
+                  setAuthError("");
+                }}
+                className={`flex-1 rounded-md py-2 text-sm font-medium transition ${
+                  authMode === "signin"
+                    ? "ps-btn"
+                    : "ps-text-muted hover:opacity-80"
+                }`}
+              >
+                Sign in
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthMode("signup");
+                  setAuthError("");
+                }}
+                className={`flex-1 rounded-md py-2 text-sm font-medium transition ${
+                  authMode === "signup"
+                    ? "ps-btn"
+                    : "ps-text-muted hover:opacity-80"
+                }`}
+              >
+                Sign up
+              </button>
+            </div>
+
+            {authMode === "signin" ? (
+              <form
+                className="space-y-4"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  void (async () => {
+                    setSubmitting(true);
+                    const result = await login(loginEmail, loginPassword);
+                    if (!result.ok) setAuthError(result.error ?? "Sign in failed");
+                    else {
+                      setAuthError("");
+                      setLoginEmail("");
+                      setLoginPassword("");
+                    }
+                    setSubmitting(false);
+                  })();
+                }}
+              >
+                {authError && (
+                  <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+                    {authError}
+                  </p>
+                )}
+                <div>
+                  <label className="ps-text-muted mb-1 block text-sm font-medium">
+                    Email
+                  </label>
+                  <input
+                    required
+                    type="email"
+                    autoComplete="email"
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    className="ps-input w-full rounded-md px-4 py-3 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="ps-text-muted mb-1 block text-sm font-medium">
+                    Password
+                  </label>
+                  <input
+                    required
+                    type="password"
+                    minLength={6}
+                    autoComplete="current-password"
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    className="ps-input w-full rounded-md px-4 py-3 outline-none"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="ps-btn w-full rounded-sm py-3 text-sm font-semibold disabled:opacity-60"
+                >
+                  {submitting ? "Signing in..." : "Sign in"}
+                </button>
+              </form>
+            ) : (
+              <form
+                className="space-y-4"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  void (async () => {
+                    setSubmitting(true);
+                    const result = await register(
+                      signupName,
+                      signupEmail,
+                      signupPassword,
+                    );
+                    if (!result.ok) setAuthError(result.error ?? "Sign up failed");
+                    else {
+                      setAuthError("");
+                      setSignupName("");
+                      setSignupEmail("");
+                      setSignupPassword("");
+                    }
+                    setSubmitting(false);
+                  })();
+                }}
+              >
+                {authError && (
+                  <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+                    {authError}
+                  </p>
+                )}
+                <div>
+                  <label className="ps-text-muted mb-1 block text-sm font-medium">
+                    Full name
+                  </label>
+                  <input
+                    required
+                    type="text"
+                    autoComplete="name"
+                    value={signupName}
+                    onChange={(e) => setSignupName(e.target.value)}
+                    className="ps-input w-full rounded-md px-4 py-3 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="ps-text-muted mb-1 block text-sm font-medium">
+                    Email
+                  </label>
+                  <input
+                    required
+                    type="email"
+                    autoComplete="email"
+                    value={signupEmail}
+                    onChange={(e) => setSignupEmail(e.target.value)}
+                    className="ps-input w-full rounded-md px-4 py-3 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="ps-text-muted mb-1 block text-sm font-medium">
+                    Password
+                  </label>
+                  <input
+                    required
+                    type="password"
+                    minLength={6}
+                    autoComplete="new-password"
+                    value={signupPassword}
+                    onChange={(e) => setSignupPassword(e.target.value)}
+                    className="ps-input w-full rounded-md px-4 py-3 outline-none"
+                  />
+                  <p className="ps-text-subtle mt-1 text-xs">At least 6 characters</p>
+                </div>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="ps-btn w-full rounded-sm py-3 text-sm font-semibold disabled:opacity-60"
+                >
+                  {submitting ? "Creating account..." : "Create account"}
+                </button>
+              </form>
             )}
-            <div>
-              <label className="ps-text-muted mb-1 block text-sm font-medium">
-                Email
-              </label>
-              <input
-                required
-                type="email"
-                value={loginEmail}
-                onChange={(e) => setLoginEmail(e.target.value)}
-                className="ps-input w-full rounded-md px-4 py-3 outline-none"
-              />
-            </div>
-            <div>
-              <label className="ps-text-muted mb-1 block text-sm font-medium">
-                Password
-              </label>
-              <input
-                required
-                type="password"
-                minLength={6}
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
-                className="ps-input w-full rounded-md px-4 py-3 outline-none"
-              />
-            </div>
-            <button
-              type="submit"
-              className="ps-btn w-full rounded-sm py-3 text-sm font-semibold"
-            >
-              Log in
-            </button>
-          </form>
+          </>
         )}
       </Modal>
 
@@ -125,9 +278,11 @@ export function SiteModals() {
           className="space-y-4"
           onSubmit={(e) => {
             e.preventDefault();
-            const result = trackOrder(trackId, trackEmail);
-            setTrackResult(result);
-            if (!result) showToast("Order not found. Check your details.");
+            void (async () => {
+              const result = await trackOrder(trackId, trackEmail);
+              setTrackResult(result);
+              if (!result) showToast("Order not found. Check your details.");
+            })();
           }}
         >
           <div>
@@ -184,7 +339,10 @@ export function SiteModals() {
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                    onClick={() => {
+                      if (item.quantity <= 1) void removeFromCart(item.id);
+                      else void updateQuantity(item.id, item.quantity - 1);
+                    }}
                     className="ps-border h-8 w-8 rounded border"
                   >
                     −
@@ -192,14 +350,14 @@ export function SiteModals() {
                   <span className="w-6 text-center">{item.quantity}</span>
                   <button
                     type="button"
-                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                    onClick={() => void updateQuantity(item.id, item.quantity + 1)}
                     className="ps-border h-8 w-8 rounded border"
                   >
                     +
                   </button>
                   <button
                     type="button"
-                    onClick={() => removeFromCart(item.id)}
+                    onClick={() => void removeFromCart(item.id)}
                     className="ml-2 text-sm text-red-600"
                   >
                     Remove
@@ -211,16 +369,32 @@ export function SiteModals() {
               <span>Subtotal</span>
               <span>${subtotal.toFixed(2)}</span>
             </div>
+            <div>
+              <label className="ps-text-muted mb-1 block text-sm font-medium">
+                Email for order confirmation
+              </label>
+              <input
+                required
+                type="email"
+                value={checkoutEmail}
+                onChange={(e) => setCheckoutEmail(e.target.value)}
+                className="ps-input w-full rounded-md px-4 py-3 outline-none"
+              />
+            </div>
             <button
               type="button"
+              disabled={submitting}
               onClick={() => {
-                clearCart();
-                closeModal();
-                showToast("Order placed! Thank you for your purchase.");
+                void (async () => {
+                  setSubmitting(true);
+                  const result = await checkout(checkoutEmail);
+                  if (!result.ok) showToast(result.error ?? "Checkout failed.");
+                  setSubmitting(false);
+                })();
               }}
-              className="ps-btn w-full rounded-sm py-3 text-sm font-semibold"
+              className="ps-btn w-full rounded-sm py-3 text-sm font-semibold disabled:opacity-60"
             >
-              Check out
+              {submitting ? "Placing order..." : "Check out"}
             </button>
           </div>
         )}
@@ -286,7 +460,7 @@ export function Toast() {
   const { toast } = useProductSite();
   if (!toast) return null;
   return (
-    <div className="ps-btn fixed bottom-6 left-1/2 z-[60] -translate-x-1/2 rounded-full px-6 py-3 text-sm font-medium shadow-lg">
+    <div className="ps-btn ps-toast fixed bottom-6 left-1/2 z-[60] -translate-x-1/2 rounded-full px-6 py-3 text-sm font-medium shadow-lg">
       {toast}
     </div>
   );

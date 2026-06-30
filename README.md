@@ -82,7 +82,7 @@ lib/
 
 ## Note on data storage
 
-Sites are stored in memory. They are cleared when the dev server restarts. For production use, connect a database or file-based persistence.
+Sites are stored in memory in the admin app (cleared on restart). **Downloaded product sites** are full-stack Next.js apps with SQLite, API routes, and real auth.
 
 ## Tech stack
 

@@ -41,9 +41,18 @@
 .ps-btn {
   background: var(--ps-btn-bg);
   color: var(--ps-btn-text);
+  transition:
+    background 0.2s ease,
+    transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.2s ease;
 }
 .ps-btn:hover {
   background: var(--ps-btn-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -6px color-mix(in srgb, var(--ps-btn-bg) 45%, transparent);
+}
+.ps-btn:active {
+  transform: translateY(0);
 }
 .ps-border {
   border-color: var(--ps-border);
@@ -61,6 +70,13 @@
 .ps-card {
   background: var(--ps-card-bg);
   border-color: var(--ps-border);
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s ease;
+}
+.ps-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 32px -12px rgba(0, 0, 0, 0.12);
 }
 .ps-stat {
   color: var(--ps-stat-accent);
@@ -71,6 +87,133 @@
 .ps-highlight {
   background: var(--ps-highlight-bg);
 }
+
+/* Scroll reveal */
+.ps-reveal {
+  opacity: 0;
+  transform: translateY(var(--ps-reveal-y, 24px));
+  transition:
+    opacity var(--ps-reveal-duration, 800ms) cubic-bezier(0.22, 1, 0.36, 1)
+      var(--ps-reveal-delay, 0ms),
+    transform var(--ps-reveal-duration, 800ms) cubic-bezier(0.22, 1, 0.36, 1)
+      var(--ps-reveal-delay, 0ms);
+}
+.ps-reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Banner entrance */
+.ps-banner {
+  animation: ps-slide-down 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes ps-slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header fade in */
+.ps-header {
+  animation: ps-fade-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+}
+@keyframes ps-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Buttons — hover lift merged above */
+
+/* Stat cards — hover lift merged above */
+
+/* Modal */
+.ps-modal-open .ps-modal-backdrop {
+  animation: ps-backdrop-in 0.25s ease both;
+}
+.ps-modal-open .ps-modal-panel {
+  animation: ps-modal-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.ps-modal-closing .ps-modal-backdrop {
+  animation: ps-backdrop-out 0.2s ease both;
+}
+.ps-modal-closing .ps-modal-panel {
+  animation: ps-modal-out 0.2s ease both;
+}
+@keyframes ps-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes ps-backdrop-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes ps-modal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+@keyframes ps-modal-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+}
+
+/* Toast */
+.ps-toast {
+  animation: ps-toast-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes ps-toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 16px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* Hero image float */
+.ps-hero-image {
+  animation: ps-float 6s ease-in-out infinite;
+}
+@keyframes ps-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
 .ps-modal {
   background: var(--ps-page-bg);
   color: var(--ps-text);

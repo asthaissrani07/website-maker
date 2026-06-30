@@ -1,6 +1,7 @@
 "use client";
 
 import { useProductSite } from "./ProductSiteContext";
+import { ProductReveal } from "./ProductReveal";
 
 function getImageSrc(
   imageBase64: string | undefined,
@@ -19,7 +20,7 @@ export function ProductHero() {
   return (
     <section id="shop" className="ps-section scroll-mt-24 px-4 py-12 md:px-6 md:py-20">
       <div className="mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-2 md:gap-16">
-        <div className="space-y-6">
+        <ProductReveal className="space-y-6">
           <div className="flex items-center gap-2 text-sm font-medium ps-accent">
             <span className="ps-star">★★★★★</span>
             <span>
@@ -34,18 +35,18 @@ export function ProductHero() {
             <button
               type="button"
               onClick={addToCart}
-              className="ps-btn rounded-sm px-8 py-4 text-sm font-semibold tracking-wide transition active:scale-[0.98]"
+              className="ps-btn rounded-sm px-8 py-4 text-sm font-semibold tracking-wide"
             >
               {config.ctaText} &gt;
             </button>
             <span className="ps-text text-xl font-semibold">${config.price}</span>
           </div>
-        </div>
-        <div className="flex justify-center">
+        </ProductReveal>
+        <ProductReveal delay={120} className="flex justify-center">
           <button
             type="button"
             onClick={addToCart}
-            className="relative aspect-square w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl transition hover:shadow-2xl active:scale-[0.99]"
+            className="ps-hero-image relative aspect-square w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl transition hover:shadow-2xl active:scale-[0.99]"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -54,7 +55,7 @@ export function ProductHero() {
               className="h-full w-full object-cover"
             />
           </button>
-        </div>
+        </ProductReveal>
       </div>
     </section>
   );

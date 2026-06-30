@@ -9,6 +9,11 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import {
+  createProductApiClient,
+  type ProductApiClient,
+} from "@/lib/product-api-client";
+import type { CartItem, TrackResult, UserSession } from "@/lib/product-backend/types";
 
 export interface SiteContent {
   brandName: string;
@@ -48,74 +53,82 @@ export type ModalType =
   | "contact-info"
   | null;
 
-export interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-}
-
-export interface TrackResult {
-  orderId: string;
-  status: string;
-  eta: string;
-  location: string;
-}
+export type { CartItem, TrackResult, UserSession };
 
 interface ProductSiteContextValue {
   config: SiteContent;
+  api: ProductApiClient;
   activeModal: ModalType;
   openModal: (modal: Exclude<ModalType, null>) => void;
   closeModal: () => void;
   scrollTo: (id: string) => void;
   cart: CartItem[];
   cartCount: number;
-  addToCart: () => void;
-  removeFromCart: (id: string) => void;
-  updateQuantity: (id: string, quantity: number) => void;
-  clearCart: () => void;
-  user: { email: string } | null;
-  login: (email: string, password: string) => { ok: boolean; error?: string };
-  logout: () => void;
-  trackOrder: (orderId: string, email: string) => TrackResult | null;
+  addToCart: () => Promise<void>;
+  removeFromCart: (id: string) => Promise<void>;
+  updateQuantity: (id: string, quantity: number) => Promise<void>;
+  checkout: (email: string) => Promise<{ ok: boolean; orderId?: string; error?: string }>;
+  user: UserSession | null;
+  login: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
+  register: (
+    name: string,
+    email: string,
+    password: string,
+  ) => Promise<{ ok: boolean; error?: string }>;
+  logout: () => Promise<void>;
+  trackOrder: (orderId: string, email: string) => Promise<TrackResult | null>;
   searchQuery: string;
   setSearchQuery: (q: string) => void;
   toast: string | null;
   showToast: (message: string) => void;
+  loading: boolean;
 }
 
 const ProductSiteContext = createContext<ProductSiteContextValue | null>(null);
 
-const USER_KEY = "product-site-user";
-const CART_KEY = "product-site-cart";
-
 export function ProductSiteProvider({
   config,
+  apiBase = "/api",
   children,
 }: {
   config: SiteContent;
+  apiBase?: string;
   children: ReactNode;
 }) {
+  const api = useMemo(() => createProductApiClient(apiBase), [apiBase]);
+
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [user, setUser] = useState<{ email: string } | null>(null);
+  const [user, setUser] = useState<UserSession | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [toast, setToast] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    try {
-      const savedUser = localStorage.getItem(USER_KEY);
-      if (savedUser) setUser(JSON.parse(savedUser));
-      const savedCart = localStorage.getItem(CART_KEY);
-      if (savedCart) setCart(JSON.parse(savedCart));
-    } catch {
-      /* ignore */
+  const refreshSession = useCallback(async () => {
+    const res = await api.getSession();
+    if (res.ok && res.data) {
+      setUser(res.data.user ?? null);
     }
-  }, []);
+  }, [api]);
+
+  const refreshCart = useCallback(async () => {
+    const res = await api.getCart();
+    if (res.ok && res.data) {
+      setCart(res.data.cart ?? []);
+    }
+  }, [api]);
 
   useEffect(() => {
-    localStorage.setItem(CART_KEY, JSON.stringify(cart));
-  }, [cart]);
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      await Promise.all([refreshSession(), refreshCart()]);
+      if (!cancelled) setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [refreshSession, refreshCart]);
 
   const showToast = useCallback((message: string) => {
     setToast(message);
@@ -128,89 +141,109 @@ export function ProductSiteProvider({
 
   const closeModal = useCallback(() => setActiveModal(null), []);
 
-  const scrollTo = useCallback((id: string) => {
-    closeModal();
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }, [closeModal]);
-
-  const addToCart = useCallback(() => {
-    const price = parseFloat(config.price) || 0;
-    setCart((prev) => {
-      const existing = prev.find((i) => i.id === "main-product");
-      if (existing) {
-        return prev.map((i) =>
-          i.id === "main-product"
-            ? { ...i, quantity: i.quantity + 1 }
-            : i,
-        );
-      }
-      return [
-        ...prev,
-        {
-          id: "main-product",
-          name: config.productName,
-          price,
-          quantity: 1,
-        },
-      ];
-    });
-    showToast(`${config.productName} added to cart`);
-    openModal("cart");
-  }, [config.price, config.productName, openModal, showToast]);
-
-  const removeFromCart = useCallback((id: string) => {
-    setCart((prev) => prev.filter((i) => i.id !== id));
-  }, []);
-
-  const updateQuantity = useCallback((id: string, quantity: number) => {
-    if (quantity < 1) return;
-    setCart((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, quantity } : i)),
-    );
-  }, []);
-
-  const clearCart = useCallback(() => setCart([]), []);
-
-  const login = useCallback(
-    (email: string, password: string) => {
-      if (!email.includes("@")) {
-        return { ok: false, error: "Please enter a valid email." };
-      }
-      if (password.length < 6) {
-        return { ok: false, error: "Password must be at least 6 characters." };
-      }
-      const session = { email };
-      setUser(session);
-      localStorage.setItem(USER_KEY, JSON.stringify(session));
-      showToast(`Welcome back!`);
+  const scrollTo = useCallback(
+    (id: string) => {
       closeModal();
-      return { ok: true };
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
     },
-    [closeModal, showToast],
+    [closeModal],
   );
 
-  const logout = useCallback(() => {
+  const addToCart = useCallback(async () => {
+    const price = parseFloat(config.price) || 0;
+    const res = await api.addToCart({
+      id: "main-product",
+      name: config.productName,
+      price,
+    });
+    if (res.ok && res.data) {
+      setCart(res.data.cart);
+      showToast(`${config.productName} added to cart`);
+      openModal("cart");
+    } else {
+      showToast(res.error ?? "Could not add to cart.");
+    }
+  }, [api, config.price, config.productName, openModal, showToast]);
+
+  const removeFromCart = useCallback(
+    async (id: string) => {
+      const res = await api.removeCartItem(id);
+      if (res.ok && res.data) setCart(res.data.cart);
+    },
+    [api],
+  );
+
+  const updateQuantity = useCallback(
+    async (id: string, quantity: number) => {
+      if (quantity < 1) return;
+      const res = await api.updateCartItem(id, quantity);
+      if (res.ok && res.data) setCart(res.data.cart);
+    },
+    [api],
+  );
+
+  const checkout = useCallback(
+    async (email: string) => {
+      const res = await api.checkout(email);
+      if (res.ok && res.data) {
+        setCart([]);
+        closeModal();
+        showToast(`Order ${res.data.orderId} placed! Thank you.`);
+        return { ok: true, orderId: res.data.orderId };
+      }
+      return { ok: false, error: res.error ?? "Checkout failed." };
+    },
+    [api, closeModal, showToast],
+  );
+
+  const login = useCallback(
+    async (email: string, password: string) => {
+      const res = await api.login(email, password);
+      if (res.ok && res.data?.user) {
+        setUser(res.data.user);
+        await refreshCart();
+        showToast(`Welcome back, ${res.data.user.name}!`);
+        closeModal();
+        return { ok: true };
+      }
+      return { ok: false, error: res.error ?? "Sign in failed." };
+    },
+    [api, closeModal, refreshCart, showToast],
+  );
+
+  const register = useCallback(
+    async (name: string, email: string, password: string) => {
+      const res = await api.register(name, email, password);
+      if (res.ok && res.data?.user) {
+        setUser(res.data.user);
+        await refreshCart();
+        showToast(`Account created. Welcome, ${res.data.user.name}!`);
+        closeModal();
+        return { ok: true };
+      }
+      return { ok: false, error: res.error ?? "Sign up failed." };
+    },
+    [api, closeModal, refreshCart, showToast],
+  );
+
+  const logout = useCallback(async () => {
+    await api.logout();
     setUser(null);
-    localStorage.removeItem(USER_KEY);
+    await refreshCart();
     showToast("You have been logged out.");
-  }, [showToast]);
+  }, [api, refreshCart, showToast]);
 
-  const trackOrder = useCallback((orderId: string, email: string) => {
-    const id = orderId.trim();
-    const mail = email.trim();
-    if (id.length < 4 || !mail.includes("@")) return null;
-
-    const statuses = [
-      { status: "Order confirmed", eta: "2–3 business days", location: "Warehouse" },
-      { status: "Shipped", eta: "Arriving Friday", location: "In transit" },
-      { status: "Out for delivery", eta: "Today by 8 PM", location: "Local carrier" },
-    ];
-    const pick = statuses[id.charCodeAt(0) % statuses.length];
-    return { orderId: id, ...pick };
-  }, []);
+  const trackOrder = useCallback(
+    async (orderId: string, email: string) => {
+      const res = await api.trackOrder(orderId, email);
+      if (res.ok && res.data) return res.data.order ?? null;
+      return null;
+    },
+    [api],
+  );
 
   const cartCount = useMemo(
     () => cart.reduce((sum, i) => sum + i.quantity, 0),
@@ -220,6 +253,7 @@ export function ProductSiteProvider({
   const value = useMemo(
     () => ({
       config,
+      api,
       activeModal,
       openModal,
       closeModal,
@@ -229,18 +263,21 @@ export function ProductSiteProvider({
       addToCart,
       removeFromCart,
       updateQuantity,
-      clearCart,
+      checkout,
       user,
       login,
+      register,
       logout,
       trackOrder,
       searchQuery,
       setSearchQuery,
       toast,
       showToast,
+      loading,
     }),
     [
       config,
+      api,
       activeModal,
       openModal,
       closeModal,
@@ -250,14 +287,16 @@ export function ProductSiteProvider({
       addToCart,
       removeFromCart,
       updateQuantity,
-      clearCart,
+      checkout,
       user,
       login,
+      register,
       logout,
       trackOrder,
       searchQuery,
       toast,
       showToast,
+      loading,
     ],
   );
 

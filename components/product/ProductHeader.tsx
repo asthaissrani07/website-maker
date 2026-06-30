@@ -60,7 +60,7 @@ export function ProductHeader() {
               onClick={() => openModal("login")}
               className={`hidden sm:inline ${navBtn}`}
             >
-              {user ? user.email.split("@")[0] : "Log in"}
+              {user ? user.name.split(" ")[0] : "Sign in"}
             </button>
             <button
               type="button"
@@ -86,7 +86,9 @@ export function ProductHeader() {
               <button type="button" onClick={() => navAction(() => scrollTo("contact"))} className={`py-2 text-left ${navBtn}`}>Contact</button>
               <button type="button" onClick={() => navAction(() => openModal("track"))} className={`py-2 text-left ${navBtn}`}>Track Your Order</button>
               <button type="button" onClick={() => navAction(() => openModal("search"))} className={`py-2 text-left ${navBtn}`}>Search</button>
-              <button type="button" onClick={() => navAction(() => openModal("login"))} className={`py-2 text-left ${navBtn}`}>Log in</button>
+              <button type="button" onClick={() => navAction(() => openModal("login"))} className={`py-2 text-left ${navBtn}`}>
+                {user ? `Hi, ${user.name.split(" ")[0]}` : "Sign in"}
+              </button>
             </div>
           </nav>
         )}

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useProductSite } from "./ProductSiteContext";
 
 export function ProductFooter() {
-  const { config, openModal, scrollTo, showToast } = useProductSite();
+  const { config, openModal, scrollTo, showToast, api } = useProductSite();
   const [email, setEmail] = useState("");
 
   const links: { label: string; action: () => void }[] = [
@@ -47,10 +47,15 @@ export function ProductFooter() {
             className="mt-4 flex gap-2"
             onSubmit={(e) => {
               e.preventDefault();
-              if (email.includes("@")) {
-                showToast("Thanks for subscribing!");
-                setEmail("");
-              }
+              void (async () => {
+                const res = await api.subscribeNewsletter(email);
+                if (res.ok) {
+                  showToast("Thanks for subscribing!");
+                  setEmail("");
+                } else {
+                  showToast(res.error ?? "Subscription failed.");
+                }
+              })();
             }}
           >
             <input

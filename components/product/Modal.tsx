@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 export function Modal({
   open,
@@ -13,6 +13,12 @@ export function Modal({
   title: string;
   children: ReactNode;
 }) {
+  const [mounted, setMounted] = useState(open);
+
+  useEffect(() => {
+    if (open) setMounted(true);
+  }, [open]);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -26,23 +32,30 @@ export function Modal({
     };
   }, [open, onClose]);
 
-  if (!open) return null;
+  if (!open && !mounted) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${
+        open ? "ps-modal-open" : "ps-modal-closing"
+      }`}
+      onAnimationEnd={() => {
+        if (!open) setMounted(false);
+      }}
+    >
       <button
         type="button"
         aria-label="Close"
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="ps-modal-backdrop absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="ps-modal relative z-10 max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl border ps-border p-6 shadow-2xl">
+      <div className="ps-modal ps-modal-panel relative z-10 max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl border ps-border p-6 shadow-2xl">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="ps-text ps-font-display text-xl font-semibold">{title}</h2>
           <button
             type="button"
             onClick={onClose}
-            className="ps-text-subtle rounded-full p-1 text-2xl leading-none hover:opacity-70"
+            className="ps-text-subtle rounded-full p-1 text-2xl leading-none transition hover:opacity-70 hover:rotate-90"
           >
             ×
           </button>
