@@ -74,6 +74,11 @@ export function createProductApiClient(apiBase: string) {
         body: JSON.stringify({ orderId, email }),
       }),
 
+    getOrder: (orderId: string, email: string) =>
+      request<{ order: import("./product-backend/types").OrderDetails }>(
+        `/orders/${encodeURIComponent(orderId)}?email=${encodeURIComponent(email)}`,
+      ),
+
     sendContact: (data: {
       name: string;
       email: string;

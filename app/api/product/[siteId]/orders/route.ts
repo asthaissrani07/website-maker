@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { getSite } from "@/lib/store";
 import { handleCheckout } from "@/lib/product-backend/handlers";
 import { jsonError } from "@/lib/product-backend/http";
 
@@ -8,7 +7,6 @@ export async function POST(
   { params }: { params: Promise<{ siteId: string }> },
 ) {
   const { siteId } = await params;
-  if (!(await getSite(siteId))) return jsonError("Site not found.", 404);
   const body = await req.json();
   const result = await handleCheckout(siteId, body);
   if (!result.ok) return jsonError(result.error);

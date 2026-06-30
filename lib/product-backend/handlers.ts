@@ -2,7 +2,7 @@ import { getGuestId } from "./cookies";
 import { getCurrentUser, loginUser, logoutUser, registerUser } from "./auth";
 import { addCartItem, getCart, removeCartItem, updateCartQuantity } from "./cart";
 import { saveContactMessage, subscribeNewsletter } from "./contact";
-import { placeOrder, trackOrder } from "./orders";
+import { placeOrder, trackOrder, getOrderDetails } from "./orders";
 
 export const STANDALONE_SITE_ID = "main";
 
@@ -117,6 +117,19 @@ export async function handleTrackOrder(
     body.email ?? "",
     standalone,
   );
+  return { ok: true as const, order };
+}
+
+export async function handleGetOrder(
+  siteId: string,
+  orderId: string,
+  email: string,
+  standalone = false,
+) {
+  const order = getOrderDetails(siteId, orderId, email, standalone);
+  if (!order) {
+    return { ok: false as const, error: "Order not found." };
+  }
   return { ok: true as const, order };
 }
 

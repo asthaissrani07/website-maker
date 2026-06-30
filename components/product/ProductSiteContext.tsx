@@ -13,6 +13,7 @@ import {
   createProductApiClient,
   type ProductApiClient,
 } from "@/lib/product-api-client";
+import { productPaths, type ProductPaths } from "@/lib/product-paths";
 import type { CartItem, TrackResult, UserSession } from "@/lib/product-backend/types";
 
 export interface SiteContent {
@@ -82,6 +83,8 @@ interface ProductSiteContextValue {
   toast: string | null;
   showToast: (message: string) => void;
   loading: boolean;
+  basePath: string;
+  paths: ProductPaths;
 }
 
 const ProductSiteContext = createContext<ProductSiteContextValue | null>(null);
@@ -89,13 +92,16 @@ const ProductSiteContext = createContext<ProductSiteContextValue | null>(null);
 export function ProductSiteProvider({
   config,
   apiBase = "/api",
+  basePath = "",
   children,
 }: {
   config: SiteContent;
   apiBase?: string;
+  basePath?: string;
   children: ReactNode;
 }) {
   const api = useMemo(() => createProductApiClient(apiBase), [apiBase]);
+  const paths = useMemo(() => productPaths(basePath), [basePath]);
 
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -274,6 +280,8 @@ export function ProductSiteProvider({
       toast,
       showToast,
       loading,
+      basePath,
+      paths,
     }),
     [
       config,
@@ -297,6 +305,8 @@ export function ProductSiteProvider({
       toast,
       showToast,
       loading,
+      basePath,
+      paths,
     ],
   );
 

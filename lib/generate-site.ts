@@ -289,6 +289,11 @@ const PRODUCT_COMPONENT_FILES = [
   "StatsSection.tsx",
   "ContactForm.tsx",
   "ProductFooter.tsx",
+  "ProductSiteShell.tsx",
+  "ProductHome.tsx",
+  "ProductDetailsPage.tsx",
+  "OrderDetailsPage.tsx",
+  "LegalPageView.tsx",
   "ProductSite.tsx",
 ];
 
@@ -302,53 +307,45 @@ function loadExportComponents(): Record<string, string> {
     content = content.replace(/@\/lib\/product-themes/g, "@/lib/product-themes");
 
     if (file === "ProductSite.tsx") {
-      content = content
-        .replace(
-          /import type \{ ProductSiteConfig \} from "@\/lib\/types";\n/,
-          'import { siteConfig } from "@/lib/site-config";\n',
-        )
-        .replace(
-          /export function ProductSite\(\{ config \}: \{ config: ProductSiteConfig \}\)/,
-          "export function ProductSite()",
-        )
-        .replace(/config\.fontPairId/g, "siteConfig.fontPairId")
-        .replace(/resolveSiteStyle\(config\)/g, "resolveSiteStyle(siteConfig)")
-        .replace(
-          /<ProductSiteProvider config=\{config\}>/,
-          '<ProductSiteProvider config={siteConfig} apiBase="/api">',
-        );
+      content = `import { siteConfig } from "@/lib/site-config";
+import { ProductHome } from "./ProductHome";
+import { ProductSiteShell } from "./ProductSiteShell";
+
+export function ProductSite() {
+  return (
+    <ProductSiteShell config={siteConfig} apiBase="/api" basePath="">
+      <ProductHome />
+    </ProductSiteShell>
+  );
+}
+`;
+    }
+
+    if (file === "ProductDetailsPage.tsx") {
+      content = content.replace(
+        /return "\/placeholder-product\.svg";/,
+        'return "/product.jpg";',
+      );
     }
 
     if (file === "ProductHero.tsx") {
-      content = content
-        .replace(
-          /function getImageSrc[\s\S]*?\n\}\n\n/,
-          'import Image from "next/image";\n\n',
-        )
-        .replace(
-          /const imageSrc = getImageSrc[\s\S]*?;\n\n/,
-          "",
-        )
-        .replace(
-          /<button[\s\S]*?<img[\s\S]*?\/>\n          <\/button>/,
-          `<button
-            type="button"
-            onClick={addToCart}
-            className="relative aspect-square w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl transition hover:shadow-2xl active:scale-[0.99]"
-          >
-            <Image
-              src="/product.jpg"
-              alt={config.productName}
-              fill
-              className="object-cover"
-              priority
-            />
-          </button>`,
-        );
+      content = content.replace(
+        /return "\/placeholder-product\.svg";/,
+        'return "/product.jpg";',
+      );
     }
 
     out[`components/${file}`] = content;
   }
+
+  out["lib/product-paths.ts"] = fs.readFileSync(
+    path.join(process.cwd(), "lib", "product-paths.ts"),
+    "utf-8",
+  );
+  out["lib/product-legal.ts"] = fs.readFileSync(
+    path.join(process.cwd(), "lib", "product-legal.ts"),
+    "utf-8",
+  );
 
   const themesPath = path.join(process.cwd(), "lib", "product-themes.ts");
   out["lib/product-themes.ts"] = fs.readFileSync(themesPath, "utf-8");
@@ -473,6 +470,22 @@ export async function DELETE(req: Request) {
       "POST",
       "handleTrackOrder",
     ),
+    "app/api/orders/[orderId]/route.ts": `import { NextResponse } from "next/server";
+import { handleGetOrder, STANDALONE_SITE_ID } from "@/lib/product-backend/handlers";
+import { jsonError } from "@/lib/product-backend/http";
+
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ orderId: string }> },
+) {
+  const { orderId } = await params;
+  const email = new URL(req.url).searchParams.get("email") ?? "";
+  if (!email) return jsonError("Email is required.", 400);
+  const result = await handleGetOrder(STANDALONE_SITE_ID, orderId, email, true);
+  if (!result.ok) return jsonError(result.error, 404);
+  return NextResponse.json(result);
+}
+`,
     "app/api/contact/route.ts": route("contact", "POST", "handleContact"),
     "app/api/newsletter/route.ts": route(
       "newsletter",
@@ -481,6 +494,69 @@ export async function DELETE(req: Request) {
     ),
     ".env.example": `# Optional — set a strong secret in production
 SESSION_SECRET=change-me-in-production
+`,
+  };
+}
+
+function loadStandalonePages(): Record<string, string> {
+  return {
+    "app/product/page.tsx": `import { ProductDetailsPage } from "@/components/ProductDetailsPage";
+import { ProductSiteShell } from "@/components/ProductSiteShell";
+import { siteConfig } from "@/lib/site-config";
+
+export default function ProductPage() {
+  return (
+    <ProductSiteShell config={siteConfig} apiBase="/api" basePath="">
+      <ProductDetailsPage />
+    </ProductSiteShell>
+  );
+}
+`,
+    "app/orders/[orderId]/page.tsx": `import { OrderDetailsPage } from "@/components/OrderDetailsPage";
+import { ProductSiteShell } from "@/components/ProductSiteShell";
+import { siteConfig } from "@/lib/site-config";
+
+export default async function OrderPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ orderId: string }>;
+  searchParams: Promise<{ email?: string }>;
+}) {
+  const { orderId } = await params;
+  const { email } = await searchParams;
+  return (
+    <ProductSiteShell config={siteConfig} apiBase="/api" basePath="">
+      <OrderDetailsPage orderId={orderId} email={email} />
+    </ProductSiteShell>
+  );
+}
+`,
+    "app/privacy/page.tsx": `import { LegalPageView } from "@/components/LegalPageView";
+import { ProductSiteShell } from "@/components/ProductSiteShell";
+import { privacyPolicyBody } from "@/lib/product-legal";
+import { siteConfig } from "@/lib/site-config";
+
+export default function PrivacyPage() {
+  return (
+    <ProductSiteShell config={siteConfig} apiBase="/api" basePath="">
+      <LegalPageView title="Privacy Policy" body={privacyPolicyBody(siteConfig)} />
+    </ProductSiteShell>
+  );
+}
+`,
+    "app/terms/page.tsx": `import { LegalPageView } from "@/components/LegalPageView";
+import { ProductSiteShell } from "@/components/ProductSiteShell";
+import { termsOfServiceBody } from "@/lib/product-legal";
+import { siteConfig } from "@/lib/site-config";
+
+export default function TermsPage() {
+  return (
+    <ProductSiteShell config={siteConfig} apiBase="/api" basePath="">
+      <LegalPageView title="Terms of Service" body={termsOfServiceBody(siteConfig)} />
+    </ProductSiteShell>
+  );
+}
 `,
   };
 }
@@ -532,6 +608,10 @@ export async function generateSiteZip(config: ProductSiteConfig): Promise<Buffer
   }
 
   for (const [path, content] of Object.entries(loadStandaloneApiRoutes())) {
+    root.file(path, content);
+  }
+
+  for (const [path, content] of Object.entries(loadStandalonePages())) {
     root.file(path, content);
   }
 

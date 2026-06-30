@@ -1,20 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useProductSite } from "./ProductSiteContext";
 
 export function ProductFooter() {
-  const { config, openModal, scrollTo, showToast, api } = useProductSite();
+  const { config, openModal, showToast, api, paths } = useProductSite();
   const [email, setEmail] = useState("");
-
-  const links: { label: string; action: () => void }[] = [
-    { label: "Search", action: () => openModal("search") },
-    { label: "Track Your Order", action: () => openModal("track") },
-    { label: "Refund Policy", action: () => openModal("refund") },
-    { label: "Contact Information", action: () => openModal("contact-info") },
-    { label: "Terms of Service", action: () => openModal("terms") },
-    { label: "Privacy Policy", action: () => openModal("privacy") },
-  ];
 
   const linkClass =
     "ps-text-muted text-left transition hover:text-[var(--ps-accent)]";
@@ -27,13 +19,41 @@ export function ProductFooter() {
             Quick links
           </h3>
           <ul className="mt-4 space-y-2 text-sm">
-            {links.map((link) => (
-              <li key={link.label}>
-                <button type="button" onClick={link.action} className={linkClass}>
-                  {link.label}
-                </button>
-              </li>
-            ))}
+            <li>
+              <Link href={paths.product} className={linkClass}>
+                Product details
+              </Link>
+            </li>
+            <li>
+              <button type="button" onClick={() => openModal("search")} className={linkClass}>
+                Search
+              </button>
+            </li>
+            <li>
+              <button type="button" onClick={() => openModal("track")} className={linkClass}>
+                Track Your Order
+              </button>
+            </li>
+            <li>
+              <button type="button" onClick={() => openModal("refund")} className={linkClass}>
+                Refund Policy
+              </button>
+            </li>
+            <li>
+              <button type="button" onClick={() => openModal("contact-info")} className={linkClass}>
+                Contact Information
+              </button>
+            </li>
+            <li>
+              <Link href={paths.terms} className={linkClass}>
+                Terms of Service
+              </Link>
+            </li>
+            <li>
+              <Link href={paths.privacy} className={linkClass}>
+                Privacy Policy
+              </Link>
+            </li>
           </ul>
         </div>
         <div>
@@ -75,13 +95,9 @@ export function ProductFooter() {
           <h3 className="ps-text text-sm font-semibold uppercase tracking-widest">
             Contact
           </h3>
-          <button
-            type="button"
-            onClick={() => scrollTo("contact")}
-            className={`mt-4 block text-sm ${linkClass}`}
-          >
+          <Link href={`${paths.home}#contact`} className={`mt-4 block text-sm ${linkClass}`}>
             {config.contactEmail}
-          </button>
+          </Link>
         </div>
       </div>
       <div className="ps-border ps-text-subtle mx-auto mt-10 max-w-6xl border-t pt-6 text-center text-sm">

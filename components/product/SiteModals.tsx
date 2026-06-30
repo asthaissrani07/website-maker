@@ -23,6 +23,7 @@ export function SiteModals() {
     showToast,
     user,
     logout,
+    paths,
   } = useProductSite();
 
   const [loginEmail, setLoginEmail] = useState("");
@@ -388,7 +389,11 @@ export function SiteModals() {
                 void (async () => {
                   setSubmitting(true);
                   const result = await checkout(checkoutEmail);
-                  if (!result.ok) showToast(result.error ?? "Checkout failed.");
+                  if (result.ok && result.orderId) {
+                    window.location.href = paths.order(result.orderId, checkoutEmail);
+                  } else if (!result.ok) {
+                    showToast(result.error ?? "Checkout failed.");
+                  }
                   setSubmitting(false);
                 })();
               }}

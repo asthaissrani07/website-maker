@@ -2,7 +2,7 @@ import { randomUUID } from "crypto";
 import { getDatabase } from "./db";
 import { resolveCartSessionKey } from "./auth";
 import { clearCart, getCart } from "./cart";
-import type { CartItem, TrackResult } from "./types";
+import type { CartItem, OrderDetails, TrackResult } from "./types";
 
 export async function placeOrder(
   siteId: string,
@@ -74,6 +74,56 @@ export function trackOrder(
     status: row.status,
     eta: row.eta ?? "Processing",
     location: row.location ?? "Warehouse",
+  };
+}
+
+export function getOrderDetails(
+  siteId: string,
+  orderId: string,
+  email: string,
+  standalone?: boolean,
+): OrderDetails | null {
+  const id = orderId.trim().toUpperCase();
+  const mail = email.trim().toLowerCase();
+  if (id.length < 4 || !mail.includes("@")) return null;
+
+  const db = getDatabase(siteId, standalone);
+  const row = db
+    .prepare(
+      `SELECT id, email, items_json, total, status, eta, location, created_at
+       FROM orders WHERE id = ? AND email = ? COLLATE NOCASE`,
+    )
+    .get(id, mail) as
+    | {
+        id: string;
+        email: string;
+        items_json: string;
+        total: number;
+        status: string;
+        eta: string | null;
+        location: string | null;
+        created_at: string;
+      }
+    | undefined;
+
+  if (!row) return null;
+
+  let items: CartItem[] = [];
+  try {
+    items = JSON.parse(row.items_json) as CartItem[];
+  } catch {
+    items = [];
+  }
+
+  return {
+    orderId: row.id,
+    email: row.email,
+    status: row.status,
+    eta: row.eta ?? "Processing",
+    location: row.location ?? "Warehouse",
+    total: row.total,
+    items,
+    createdAt: row.created_at,
   };
 }
 

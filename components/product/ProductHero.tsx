@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useProductSite } from "./ProductSiteContext";
 import { ProductReveal } from "./ProductReveal";
 
@@ -14,7 +15,7 @@ function getImageSrc(
 }
 
 export function ProductHero() {
-  const { config, addToCart } = useProductSite();
+  const { config, paths } = useProductSite();
   const imageSrc = getImageSrc(config.imageBase64, config.imageMimeType);
 
   return (
@@ -32,21 +33,19 @@ export function ProductHero() {
           </h2>
           <p className="ps-text-muted text-lg leading-relaxed">{config.heroSubtext}</p>
           <div className="flex flex-wrap items-center gap-4 pt-2">
-            <button
-              type="button"
-              onClick={addToCart}
-              className="ps-btn rounded-sm px-8 py-4 text-sm font-semibold tracking-wide"
+            <Link
+              href={paths.product}
+              className="ps-btn inline-block rounded-sm px-8 py-4 text-sm font-semibold tracking-wide"
             >
               {config.ctaText} &gt;
-            </button>
+            </Link>
             <span className="ps-text text-xl font-semibold">${config.price}</span>
           </div>
         </ProductReveal>
         <ProductReveal delay={120} className="flex justify-center">
-          <button
-            type="button"
-            onClick={addToCart}
-            className="ps-hero-image relative aspect-square w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl transition hover:shadow-2xl active:scale-[0.99]"
+          <Link
+            href={paths.product}
+            className="ps-hero-image relative block aspect-square w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl transition hover:shadow-2xl active:scale-[0.99]"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -54,7 +53,7 @@ export function ProductHero() {
               alt={config.productName}
               className="h-full w-full object-cover"
             />
-          </button>
+          </Link>
         </ProductReveal>
       </div>
     </section>

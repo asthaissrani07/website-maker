@@ -17,6 +17,13 @@ export interface TrackResult {
   location: string;
 }
 
+export interface OrderDetails extends TrackResult {
+  email: string;
+  total: number;
+  items: CartItem[];
+  createdAt: string;
+}
+
 export interface ApiResult<T = void> {
   ok: boolean;
   data?: T;
