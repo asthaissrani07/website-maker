@@ -13,7 +13,7 @@ export async function GET(
   { params }: { params: Promise<{ siteId: string }> },
 ) {
   const { siteId } = await params;
-  if (!getSite(siteId)) return jsonError("Site not found.", 404);
+  if (!(await getSite(siteId))) return jsonError("Site not found.", 404);
   const result = await handleGetCart(siteId);
   return NextResponse.json(result);
 }
@@ -23,7 +23,7 @@ export async function POST(
   { params }: { params: Promise<{ siteId: string }> },
 ) {
   const { siteId } = await params;
-  if (!getSite(siteId)) return jsonError("Site not found.", 404);
+  if (!(await getSite(siteId))) return jsonError("Site not found.", 404);
   const body = await req.json();
   const result = await handleAddCart(siteId, body);
   if (!result.ok) return jsonError(result.error);
@@ -35,7 +35,7 @@ export async function PATCH(
   { params }: { params: Promise<{ siteId: string }> },
 ) {
   const { siteId } = await params;
-  if (!getSite(siteId)) return jsonError("Site not found.", 404);
+  if (!(await getSite(siteId))) return jsonError("Site not found.", 404);
   const body = await req.json();
   const result = await handleUpdateCart(siteId, body);
   if (!result.ok) return jsonError(result.error);
@@ -47,7 +47,7 @@ export async function DELETE(
   { params }: { params: Promise<{ siteId: string }> },
 ) {
   const { siteId } = await params;
-  if (!getSite(siteId)) return jsonError("Site not found.", 404);
+  if (!(await getSite(siteId))) return jsonError("Site not found.", 404);
   const productId = new URL(req.url).searchParams.get("productId");
   if (!productId) return jsonError("productId is required.");
   const result = await handleRemoveCart(siteId, productId);

@@ -28,6 +28,8 @@ cp .env.example .env.local
 
 2. Edit `.env.local` and set `GROQ_API_KEY=your_key_here`
 
+   For **production / Vercel**, also set `DATABASE_URL` to your [Neon](https://neon.tech) Postgres connection string (use the **pooled** URL). Without it, sites only persist locally in `data/sites/`.
+
 3. Install and run:
 
 ```bash
@@ -82,7 +84,18 @@ lib/
 
 ## Note on data storage
 
-Sites are stored in memory in the admin app (cleared on restart). **Downloaded product sites** are full-stack Next.js apps with SQLite, API routes, and real auth.
+**Admin sites** (dashboard, preview, download) are stored in **Neon Postgres** when `DATABASE_URL` is set. Locally without Postgres, sites save to `data/sites/`.
+
+**Downloaded product sites** are full-stack Next.js apps with SQLite, API routes, and real auth.
+
+### Deploy on Vercel with Neon
+
+1. Create a free database at [neon.tech](https://neon.tech)
+2. Copy the **pooled** connection string
+3. In Vercel → **Settings → Environment Variables**, add:
+   - `GROQ_API_KEY`
+   - `DATABASE_URL` = your Neon connection string
+4. Redeploy — the `sites` table is created automatically on first use
 
 ## Tech stack
 

@@ -8,7 +8,7 @@ export async function POST(
   { params }: { params: Promise<{ siteId: string }> },
 ) {
   const { siteId } = await params;
-  if (!getSite(siteId)) return jsonError("Site not found.", 404);
+  if (!(await getSite(siteId))) return jsonError("Site not found.", 404);
   const body = await req.json();
   const result = await handleAuthLogin(siteId, body);
   if (!result.ok) return jsonError(result.error);

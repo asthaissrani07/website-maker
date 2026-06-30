@@ -7,15 +7,19 @@ const globalDb = globalThis as typeof globalThis & {
 };
 
 function dataDir(): string {
-  const dir = path.join(process.cwd(), "data", "product-sites");
-  fs.mkdirSync(dir, { recursive: true });
-  return dir;
+  const root = process.env.VERCEL
+    ? path.join("/tmp", "website-maker", "product-sites")
+    : path.join(process.cwd(), "data", "product-sites");
+  fs.mkdirSync(root, { recursive: true });
+  return root;
 }
 
 function standaloneDataDir(): string {
-  const dir = path.join(process.cwd(), "data");
-  fs.mkdirSync(dir, { recursive: true });
-  return dir;
+  const root = process.env.VERCEL
+    ? path.join("/tmp", "website-maker", "data")
+    : path.join(process.cwd(), "data");
+  fs.mkdirSync(root, { recursive: true });
+  return root;
 }
 
 export function getDatabase(siteId: string, standalone = false): Database.Database {

@@ -8,7 +8,7 @@ export async function GET(
   { params }: { params: Promise<{ siteId: string }> },
 ) {
   const { siteId } = await params;
-  if (!getSite(siteId)) return jsonError("Site not found.", 404);
+  if (!(await getSite(siteId))) return jsonError("Site not found.", 404);
   const result = await handleAuthSession(siteId);
   return NextResponse.json(result);
 }

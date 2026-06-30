@@ -3,7 +3,7 @@ import { createSite, getAllSites } from "@/lib/store";
 import type { ProductSiteInput } from "@/lib/types";
 
 export async function GET() {
-  const sites = getAllSites().map((site) => ({
+  const sites = (await getAllSites()).map((site) => ({
     id: site.id,
     brandName: site.brandName,
     productName: site.productName,
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const site = createSite(body);
+    const site = await createSite(body);
     return NextResponse.json(site, { status: 201 });
   } catch {
     return NextResponse.json(

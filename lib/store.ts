@@ -1,5 +1,11 @@
 import { randomUUID } from "crypto";
 import { defaultSiteInput } from "./defaults";
+import {
+  deletePersistedSite,
+  loadAllPersistedSites,
+  loadPersistedSite,
+  persistSite,
+} from "./site-persistence";
 import type { ProductSiteConfig, ProductSiteInput } from "./types";
 
 const globalStore = globalThis as typeof globalThis & {
@@ -28,30 +34,53 @@ export function withAppearanceDefaults<T extends ProductSiteInput>(
   };
 }
 
-export function createSite(input: ProductSiteInput): ProductSiteConfig {
+export async function createSite(
+  input: ProductSiteInput,
+): Promise<ProductSiteConfig> {
   const site: ProductSiteConfig = {
     ...withAppearanceDefaults(input),
     id: randomUUID(),
     createdAt: new Date().toISOString(),
   };
   getStore().set(site.id, site);
+  await persistSite(site);
   return site;
 }
 
-export function getSite(id: string): ProductSiteConfig | undefined {
-  const site = getStore().get(id);
-  return site ? withAppearanceDefaults(site) : undefined;
+export async function getSite(
+  id: string,
+): Promise<ProductSiteConfig | undefined> {
+  const cached = getStore().get(id);
+  if (cached) return withAppearanceDefaults(cached);
+
+  const loaded = await loadPersistedSite(id);
+  if (!loaded) return undefined;
+
+  const site = withAppearanceDefaults(loaded);
+  getStore().set(id, site);
+  return site;
 }
 
-export function getAllSites(): ProductSiteConfig[] {
-  return Array.from(getStore().values())
-    .map(withAppearanceDefaults)
-    .sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    );
+export async function getAllSites(): Promise<ProductSiteConfig[]> {
+  const persisted = (await loadAllPersistedSites()).map(withAppearanceDefaults);
+  const store = getStore();
+
+  for (const site of persisted) {
+    store.set(site.id, site);
+  }
+
+  return persisted.sort(
+    (a, b) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
 }
 
-export function deleteSite(id: string): boolean {
-  return getStore().delete(id);
+export async function deleteSite(id: string): Promise<boolean> {
+  const cached = getStore().has(id);
+  const persisted = await loadPersistedSite(id);
+  if (!cached && !persisted) return false;
+
+  getStore().delete(id);
+  await deletePersistedSite(id);
+  return true;
 }

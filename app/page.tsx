@@ -4,8 +4,8 @@ import { AdminShell } from "@/components/admin/AdminShell";
 import { FadeIn } from "@/components/admin/FadeIn";
 import { getAllSites } from "@/lib/store";
 
-export default function DashboardPage() {
-  const sites = getAllSites();
+export default async function DashboardPage() {
+  const sites = await getAllSites();
 
   return (
     <AdminShell>

@@ -8,7 +8,7 @@ export default async function PreviewPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const site = getSite(id);
+  const site = await getSite(id);
 
   if (!site) {
     notFound();
