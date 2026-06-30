@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800">
+  <rect fill="#f0ebe3" width="800" height="800"/>
+  <rect x="200" y="180" width="400" height="400" rx="24" fill="#e8e4dc"/>
+  <text x="400" y="420" text-anchor="middle" dominant-baseline="middle" fill="#8b6914" font-family="Georgia, serif" font-size="28">Your Product</text>
+</svg>

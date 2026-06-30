@@ -1,36 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Website Maker
+
+A Next.js admin app that lets you build and download standalone Next.js product landing pages — inspired by the [Corevita](https://trycorevita.com/) layout.
+
+## Features
+
+- **Groq AI generation** — describe your product; Groq writes headlines, hero copy, stats, and CTAs
+- **Admin dashboard** — view all created product sites
+- **Product wizard** — edit AI-generated content, upload image, set price
+- **Live preview** — see the generated landing page before downloading
+- **ZIP download** — get a complete, runnable Next.js project with README instructions
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18.17+
+- npm
+- A [Groq API key](https://console.groq.com/keys) (free tier available)
+
+### Setup
+
+1. Copy the environment file and add your Groq API key:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Edit `.env.local` and set `GROQ_API_KEY=your_key_here`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Install and run:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install
+npm run dev
+```
 
-## Learn More
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-To learn more about Next.js, take a look at the following resources:
+### Create a product site
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Click **+ New Site**
+2. Enter product name and description in the **Groq AI** section
+3. Click **Generate content with AI** — Groq fills in all copy fields
+4. Review and edit the generated content; upload a product image
+5. Click **Build Product Website**
+6. Preview the site and click **Download ZIP**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Run a downloaded product site
 
-## Deploy on Vercel
+1. Extract the ZIP file
+2. Open a terminal in the extracted folder
+3. Run `npm install`
+4. Run `npm run dev`
+5. Visit [http://localhost:3000](http://localhost:3000)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+See the `README.md` inside each downloaded ZIP for full instructions.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Project structure
+
+```
+app/
+  page.tsx              # Admin dashboard
+  create/page.tsx       # Product site form
+  sites/[id]/page.tsx   # Site detail, preview iframe, download
+  preview/[id]/page.tsx # Full product site preview
+  api/                  # Create sites & download ZIP
+components/
+  admin/                # Dashboard UI
+  product/              # Corevita-style landing page components
+lib/
+  groq.ts               # Groq API client & prompt logic
+  store.ts              # In-memory site storage
+  generate-site.ts      # ZIP project generator
+```
+
+## AI stack
+
+- **[Groq API](https://console.groq.com/)** — fast LLM inference via `groq-sdk`
+- **Model:** `llama-3.3-70b-versatile` (override with `GROQ_MODEL` in `.env.local`)
+- **Flow:** `/api/generate` sends your product brief → Groq returns structured JSON → form is auto-filled → same template renders the site
+
+## Note on data storage
+
+Sites are stored in memory. They are cleared when the dev server restarts. For production use, connect a database or file-based persistence.
+
+## Tech stack
+
+- Next.js 16 (App Router)
+- React 19
+- Tailwind CSS 4
+- TypeScript
+- Groq SDK (`groq-sdk`)

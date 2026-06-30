@@ -1,0 +1,77 @@
+.product-site {
+  background: var(--ps-page-bg);
+  color: var(--ps-text);
+  font-family: var(--ps-font-body, system-ui, sans-serif);
+}
+.ps-font-display {
+  font-family: var(--ps-font-display, Georgia, serif);
+}
+.ps-banner {
+  background: var(--ps-banner-bg);
+  color: var(--ps-banner-text);
+}
+.ps-header {
+  background: var(--ps-header-bg);
+  border-color: var(--ps-header-border);
+}
+.ps-section {
+  background: var(--ps-section-bg);
+}
+.ps-section-alt {
+  background: var(--ps-section-alt);
+}
+.ps-text {
+  color: var(--ps-text);
+}
+.ps-text-muted {
+  color: var(--ps-text-muted);
+}
+.ps-text-subtle {
+  color: var(--ps-text-subtle);
+}
+.ps-accent {
+  color: var(--ps-accent);
+}
+.ps-accent:hover {
+  color: var(--ps-accent-hover);
+}
+.ps-star {
+  color: var(--ps-star);
+}
+.ps-btn {
+  background: var(--ps-btn-bg);
+  color: var(--ps-btn-text);
+}
+.ps-btn:hover {
+  background: var(--ps-btn-hover);
+}
+.ps-border {
+  border-color: var(--ps-border);
+}
+.ps-input {
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--ps-input-border);
+  background: var(--ps-page-bg);
+  color: var(--ps-text);
+}
+.ps-input:focus {
+  border-color: var(--ps-accent);
+}
+.ps-card {
+  background: var(--ps-card-bg);
+  border-color: var(--ps-border);
+}
+.ps-stat {
+  color: var(--ps-stat-accent);
+}
+.ps-badge {
+  background: var(--ps-badge-bg);
+}
+.ps-highlight {
+  background: var(--ps-highlight-bg);
+}
+.ps-modal {
+  background: var(--ps-page-bg);
+  color: var(--ps-text);
+}
