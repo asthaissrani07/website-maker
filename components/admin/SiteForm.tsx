@@ -154,7 +154,7 @@ export function SiteForm() {
 
   return (
     <>
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form id="site-create-form" onSubmit={handleSubmit} className="space-y-6">
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
@@ -254,7 +254,6 @@ export function SiteForm() {
       </FadeIn>
 
       {aiGenerated && canBuild && (
-        <FadeIn>
           <section
             id="build-cta"
             className="admin-card border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-6 md:p-8"
@@ -281,7 +280,6 @@ export function SiteForm() {
               </button>
             </div>
           </section>
-        </FadeIn>
       )}
 
       <FadeIn delay={120}>
@@ -529,17 +527,21 @@ export function SiteForm() {
             />
           </div>
         </div>
+        <div className="mt-8 border-t border-slate-200 pt-6">
+          <p className="mb-3 text-sm font-medium text-slate-700">
+            {canBuild
+              ? `Ready to build ${form.brandName || "your site"}`
+              : "Complete brand name, product name, and hero headline to build"}
+          </p>
+          <button
+            type="submit"
+            disabled={loading || !canBuild}
+            className="admin-btn-primary w-full rounded-lg py-3.5 text-sm font-semibold text-white shadow-md transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {loading ? "Building your site..." : "Build Product Website"}
+          </button>
+        </div>
       </section>
-      </FadeIn>
-
-      <FadeIn delay={560}>
-      <button
-        type="submit"
-        disabled={loading || !canBuild}
-        className="admin-btn-primary w-full rounded-lg py-3.5 text-sm font-semibold text-white transition hover:scale-[1.01] disabled:opacity-50"
-      >
-        {loading ? "Building your site..." : "Build Product Website"}
-      </button>
       </FadeIn>
     </form>
     </>
