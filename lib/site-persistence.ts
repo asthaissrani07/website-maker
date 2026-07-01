@@ -3,6 +3,20 @@ import path from "path";
 import { exec, isPostgresEnabled, querySites } from "./neon";
 import type { ProductSiteConfig } from "./types";
 
+function parseSiteConfig(value: unknown): ProductSiteConfig | null {
+  if (!value) return null;
+
+  if (typeof value === "string") {
+    try {
+      return JSON.parse(value) as ProductSiteConfig;
+    } catch {
+      return null;
+    }
+  }
+
+  return value as ProductSiteConfig;
+}
+
 function localPath(id: string): string {
   return path.join(process.cwd(), "data", "sites", `${id}.json`);
 }
@@ -28,10 +42,10 @@ export async function loadPersistedSite(
   id: string,
 ): Promise<ProductSiteConfig | null> {
   if (isPostgresEnabled()) {
-    const rows = await querySites<{ config: ProductSiteConfig }>`
+    const rows = await querySites<{ config: unknown }>`
       SELECT config FROM sites WHERE id = ${id}
     `;
-    return rows[0]?.config ?? null;
+    return parseSiteConfig(rows[0]?.config);
   }
 
   try {
@@ -44,10 +58,12 @@ export async function loadPersistedSite(
 
 export async function loadAllPersistedSites(): Promise<ProductSiteConfig[]> {
   if (isPostgresEnabled()) {
-    const rows = await querySites<{ config: ProductSiteConfig }>`
+    const rows = await querySites<{ config: unknown }>`
       SELECT config FROM sites ORDER BY created_at DESC
     `;
-    return rows.map((row) => row.config);
+    return rows
+      .map((row) => parseSiteConfig(row.config))
+      .filter((site): site is ProductSiteConfig => site !== null);
   }
 
   const dir = path.join(process.cwd(), "data", "sites");

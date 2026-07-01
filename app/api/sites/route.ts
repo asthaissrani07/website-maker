@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { createSite, getAllSites } from "@/lib/store";
 import type { ProductSiteInput } from "@/lib/types";
@@ -25,6 +26,7 @@ export async function POST(request: Request) {
     }
 
     const site = await createSite(body);
+    revalidatePath("/");
     return NextResponse.json(site, { status: 201 });
   } catch {
     return NextResponse.json(

@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { deleteSite, getSite } from "@/lib/store";
 
@@ -26,5 +27,6 @@ export async function DELETE(
     return NextResponse.json({ error: "Site not found." }, { status: 404 });
   }
 
+  revalidatePath("/");
   return NextResponse.json({ success: true });
 }

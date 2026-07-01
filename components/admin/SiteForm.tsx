@@ -121,6 +121,7 @@ export function SiteForm() {
       }
 
       const site = await res.json();
+      router.refresh();
       router.push(`/sites/${site.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");

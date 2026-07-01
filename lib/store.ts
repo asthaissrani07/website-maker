@@ -1,4 +1,5 @@
 import { randomUUID } from "crypto";
+import { connection } from "next/server";
 import { defaultSiteInput } from "./defaults";
 import {
   deletePersistedSite,
@@ -62,14 +63,24 @@ export async function getSite(
 }
 
 export async function getAllSites(): Promise<ProductSiteConfig[]> {
+  await connection();
+
   const persisted = (await loadAllPersistedSites()).map(withAppearanceDefaults);
   const store = getStore();
+  const byId = new Map<string, ProductSiteConfig>();
 
   for (const site of persisted) {
+    byId.set(site.id, site);
     store.set(site.id, site);
   }
 
-  return persisted.sort(
+  for (const site of store.values()) {
+    if (!byId.has(site.id)) {
+      byId.set(site.id, withAppearanceDefaults(site));
+    }
+  }
+
+  return Array.from(byId.values()).sort(
     (a, b) =>
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
