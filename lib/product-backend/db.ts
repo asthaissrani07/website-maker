@@ -94,4 +94,17 @@ function initSchema(db: Database.Database): void {
       created_at TEXT NOT NULL
     );
   `);
+
+  migrateSchema(db);
+}
+
+function migrateSchema(db: Database.Database): void {
+  const orderCols = db.prepare("PRAGMA table_info(orders)").all() as {
+    name: string;
+  }[];
+  if (!orderCols.some((c) => c.name === "payment_status")) {
+    db.exec(
+      `ALTER TABLE orders ADD COLUMN payment_status TEXT NOT NULL DEFAULT 'paid'`,
+    );
+  }
 }

@@ -50,6 +50,11 @@ export function ProductFooter() {
               </Link>
             </li>
             <li>
+              <Link href={paths.dashboard} className={linkClass}>
+                Payment dashboard
+              </Link>
+            </li>
+            <li>
               <Link href={paths.privacy} className={linkClass}>
                 Privacy Policy
               </Link>

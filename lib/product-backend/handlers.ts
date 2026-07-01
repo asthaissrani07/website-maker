@@ -2,6 +2,15 @@ import { getGuestId } from "./cookies";
 import { getCurrentUser, loginUser, logoutUser, registerUser } from "./auth";
 import { addCartItem, getCart, removeCartItem, updateCartQuantity } from "./cart";
 import { saveContactMessage, subscribeNewsletter } from "./contact";
+import {
+  getDashboardStats,
+  isAdminAuthenticated,
+  setAdminCookie,
+  clearAdminCookie,
+  verifyAdminPassword,
+  updateOrderPaymentStatus,
+  updateOrderShippingStatus,
+} from "./dashboard";
 import { placeOrder, trackOrder, getOrderDetails } from "./orders";
 
 export const STANDALONE_SITE_ID = "main";
@@ -156,4 +165,63 @@ export async function handleNewsletter(
   standalone = false,
 ) {
   return subscribeNewsletter(siteId, body.email ?? "", standalone);
+}
+
+export async function handleAdminLogin(
+  siteId: string,
+  body: { password?: string },
+  standalone = false,
+) {
+  if (!verifyAdminPassword(body.password ?? "")) {
+    return { ok: false as const, error: "Invalid admin password." };
+  }
+  await setAdminCookie(siteId);
+  return { ok: true as const };
+}
+
+export async function handleAdminLogout(siteId: string, standalone = false) {
+  await clearAdminCookie(siteId);
+  void standalone;
+  return { ok: true as const };
+}
+
+export async function handleAdminDashboard(siteId: string, standalone = false) {
+  const authed = await isAdminAuthenticated(siteId);
+  if (!authed) {
+    return { ok: false as const, error: "Admin authentication required." };
+  }
+  return { ok: true as const, stats: getDashboardStats(siteId, standalone) };
+}
+
+export async function handleAdminUpdateOrder(
+  siteId: string,
+  orderId: string,
+  body: { paymentStatus?: string; status?: string },
+  standalone = false,
+) {
+  const authed = await isAdminAuthenticated(siteId);
+  if (!authed) {
+    return { ok: false as const, error: "Admin authentication required." };
+  }
+
+  let updated = false;
+  if (body.paymentStatus) {
+    updated = updateOrderPaymentStatus(
+      siteId,
+      orderId,
+      body.paymentStatus,
+      standalone,
+    );
+  }
+  if (body.status) {
+    updated =
+      updateOrderShippingStatus(siteId, orderId, body.status, standalone) ||
+      updated;
+  }
+
+  if (!updated) {
+    return { ok: false as const, error: "Order not found or invalid update." };
+  }
+
+  return { ok: true as const, stats: getDashboardStats(siteId, standalone) };
 }

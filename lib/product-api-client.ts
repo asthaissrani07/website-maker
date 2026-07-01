@@ -95,6 +95,32 @@ export function createProductApiClient(apiBase: string) {
         method: "POST",
         body: JSON.stringify({ email }),
       }),
+
+    adminLogin: (password: string) =>
+      request<void>("/admin/dashboard", {
+        method: "POST",
+        body: JSON.stringify({ password }),
+      }),
+
+    adminLogout: () =>
+      request<void>("/admin/dashboard", { method: "DELETE" }),
+
+    getPaymentDashboard: () =>
+      request<{ stats: import("./product-backend/dashboard").DashboardStats }>(
+        "/admin/dashboard",
+      ),
+
+    updateOrderAdmin: (
+      orderId: string,
+      data: { paymentStatus?: string; status?: string },
+    ) =>
+      request<{ stats: import("./product-backend/dashboard").DashboardStats }>(
+        `/admin/orders/${encodeURIComponent(orderId)}`,
+        {
+          method: "PATCH",
+          body: JSON.stringify(data),
+        },
+      ),
   };
 }
 

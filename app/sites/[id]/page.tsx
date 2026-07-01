@@ -46,6 +46,13 @@ export default async function SiteDetailPage({
           >
             Preview Site
           </Link>
+          <Link
+            href={`/preview/${id}/dashboard`}
+            target="_blank"
+            className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-purple-200 hover:text-purple-700"
+          >
+            Payment Dashboard
+          </Link>
           <a
             href={downloadUrl}
             className="admin-btn-primary rounded-lg px-4 py-2 text-sm font-medium text-white transition hover:scale-[1.02]"

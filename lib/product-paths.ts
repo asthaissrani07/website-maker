@@ -9,6 +9,7 @@ export function productPaths(basePath: string) {
       const path = `${base}/orders/${encodeURIComponent(orderId)}`;
       return email ? `${path}?email=${encodeURIComponent(email)}` : path;
     },
+    dashboard: `${base}/dashboard`,
   };
 }
 

@@ -39,6 +39,9 @@ export function ProductHeader() {
             <button type="button" onClick={() => openModal("track")} className={navBtn}>
               Track Your Order
             </button>
+            <Link href={paths.dashboard} className={navBtn}>
+              Payments
+            </Link>
           </nav>
           <div className="flex items-center gap-3 text-sm font-medium">
             <button
@@ -85,6 +88,7 @@ export function ProductHeader() {
               <Link href={paths.product} onClick={() => setMenuOpen(false)} className={`py-2 ${navBtn}`}>Shop</Link>
               <Link href={`${paths.home}#contact`} onClick={() => setMenuOpen(false)} className={`py-2 ${navBtn}`}>Contact</Link>
               <button type="button" onClick={() => navAction(() => openModal("track"))} className={`py-2 text-left ${navBtn}`}>Track Your Order</button>
+              <Link href={paths.dashboard} onClick={() => setMenuOpen(false)} className={`py-2 ${navBtn}`}>Payments</Link>
               <button type="button" onClick={() => navAction(() => openModal("search"))} className={`py-2 text-left ${navBtn}`}>Search</button>
               <button type="button" onClick={() => navAction(() => openModal("login"))} className={`py-2 text-left ${navBtn}`}>
                 {user ? `Hi, ${user.name.split(" ")[0]}` : "Sign in"}

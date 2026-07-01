@@ -93,6 +93,14 @@ npm run dev
 | \`/api/orders/track\` | POST | Track order by ID + email |
 | \`/api/contact\` | POST | Contact form |
 | \`/api/newsletter\` | POST | Email signup |
+| \`/api/admin/dashboard\` | GET/POST/DELETE | Payment dashboard (store owner) |
+| \`/api/admin/orders/[orderId]\` | PATCH | Update payment/shipping status |
+
+## Payment dashboard
+
+Visit [\`/dashboard\`](http://localhost:3000/dashboard) to manage orders and payments.
+
+Default admin password: \`store-admin\` — set \`STORE_ADMIN_PASSWORD\` in \`.env.local\` for production.
 
 ## Customize Content
 
@@ -294,6 +302,7 @@ const PRODUCT_COMPONENT_FILES = [
   "ProductDetailsPage.tsx",
   "OrderDetailsPage.tsx",
   "LegalPageView.tsx",
+  "PaymentDashboardPage.tsx",
   "ProductSite.tsx",
 ];
 
@@ -492,8 +501,53 @@ export async function GET(
       "POST",
       "handleNewsletter",
     ),
+    "app/api/admin/dashboard/route.ts": `import { NextResponse } from "next/server";
+import {
+  handleAdminDashboard,
+  handleAdminLogin,
+  handleAdminLogout,
+  STANDALONE_SITE_ID,
+} from "@/lib/product-backend/handlers";
+import { jsonError } from "@/lib/product-backend/http";
+
+const standalone = true;
+
+export async function GET() {
+  const result = await handleAdminDashboard(STANDALONE_SITE_ID, standalone);
+  if (!result.ok) return jsonError(result.error, 401);
+  return NextResponse.json(result);
+}
+
+export async function POST(req: Request) {
+  const body = await req.json();
+  const result = await handleAdminLogin(STANDALONE_SITE_ID, body, standalone);
+  if (!result.ok) return jsonError(result.error, 401);
+  return NextResponse.json(result);
+}
+
+export async function DELETE() {
+  await handleAdminLogout(STANDALONE_SITE_ID, standalone);
+  return NextResponse.json({ ok: true });
+}
+`,
+    "app/api/admin/orders/[orderId]/route.ts": `import { NextResponse } from "next/server";
+import { handleAdminUpdateOrder, STANDALONE_SITE_ID } from "@/lib/product-backend/handlers";
+import { jsonError } from "@/lib/product-backend/http";
+
+export async function PATCH(
+  req: Request,
+  { params }: { params: Promise<{ orderId: string }> },
+) {
+  const { orderId } = await params;
+  const body = await req.json();
+  const result = await handleAdminUpdateOrder(STANDALONE_SITE_ID, orderId, body, true);
+  if (!result.ok) return jsonError(result.error, result.error.includes("auth") ? 401 : 404);
+  return NextResponse.json(result);
+}
+`,
     ".env.example": `# Optional — set a strong secret in production
 SESSION_SECRET=change-me-in-production
+STORE_ADMIN_PASSWORD=store-admin
 `,
   };
 }
@@ -554,6 +608,18 @@ export default function TermsPage() {
   return (
     <ProductSiteShell config={siteConfig} apiBase="/api" basePath="">
       <LegalPageView title="Terms of Service" body={termsOfServiceBody(siteConfig)} />
+    </ProductSiteShell>
+  );
+}
+`,
+    "app/dashboard/page.tsx": `import { PaymentDashboardPage } from "@/components/PaymentDashboardPage";
+import { ProductSiteShell } from "@/components/ProductSiteShell";
+import { siteConfig } from "@/lib/site-config";
+
+export default function DashboardPage() {
+  return (
+    <ProductSiteShell config={siteConfig} apiBase="/api" basePath="">
+      <PaymentDashboardPage />
     </ProductSiteShell>
   );
 }

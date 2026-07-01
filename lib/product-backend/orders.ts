@@ -30,8 +30,8 @@ export async function placeOrder(
   const db = getDatabase(siteId, standalone);
 
   db.prepare(
-    `INSERT INTO orders (id, user_id, email, items_json, total, status, eta, location, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO orders (id, user_id, email, items_json, total, status, payment_status, eta, location, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   ).run(
     orderId,
     userId,
@@ -39,6 +39,7 @@ export async function placeOrder(
     JSON.stringify(cart),
     total,
     "Order confirmed",
+    "paid",
     "2–5 business days",
     "Warehouse — preparing shipment",
     now,
