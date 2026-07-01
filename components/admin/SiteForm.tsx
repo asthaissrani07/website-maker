@@ -24,6 +24,12 @@ export function SiteForm() {
     contactEmail: "",
   });
   const [form, setForm] = useState<ProductSiteInput>({ ...defaultSiteInput });
+  const [aiGenerated, setAiGenerated] = useState(false);
+
+  const canBuild =
+    Boolean(form.brandName?.trim()) &&
+    Boolean(form.productName?.trim()) &&
+    Boolean(form.heroHeadline?.trim());
 
   function updateField<K extends keyof ProductSiteInput>(
     key: K,
@@ -89,6 +95,7 @@ export function SiteForm() {
         ...data,
         themeId: prev.themeId,
         fontPairId: prev.fontPairId,
+        layoutId: prev.layoutId,
         customAccentColor: prev.customAccentColor,
         customButtonColor: prev.customButtonColor,
         customBackgroundColor: prev.customBackgroundColor,
@@ -96,6 +103,13 @@ export function SiteForm() {
         imageBase64: prev.imageBase64,
         imageMimeType: prev.imageMimeType,
       }));
+      setAiGenerated(true);
+      window.setTimeout(() => {
+        document.getElementById("build-cta")?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }, 100);
     } catch (err) {
       setError(err instanceof Error ? err.message : "AI generation failed");
     } finally {
@@ -103,8 +117,7 @@ export function SiteForm() {
     }
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function buildSite() {
     setLoading(true);
     setError("");
 
@@ -130,11 +143,17 @@ export function SiteForm() {
     }
   }
 
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    await buildSite();
+  }
+
   const inputClass = "admin-input";
   const labelClass = "admin-label";
   const sectionClass = "admin-card p-6 md:p-8";
 
   return (
+    <>
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -234,6 +253,37 @@ export function SiteForm() {
       </section>
       </FadeIn>
 
+      {aiGenerated && canBuild && (
+        <FadeIn>
+          <section
+            id="build-cta"
+            className="admin-card border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-6 md:p-8"
+          >
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
+                  Ready to publish
+                </p>
+                <h2 className="mt-1 text-lg font-semibold text-slate-900">
+                  Content generated for {form.brandName}
+                </h2>
+                <p className="mt-1 text-sm text-slate-600">
+                  Review the fields below if you want, or build your website now.
+                </p>
+              </div>
+              <button
+                type="button"
+                disabled={loading}
+                onClick={() => void buildSite()}
+                className="admin-btn-primary shrink-0 rounded-lg px-8 py-3.5 text-sm font-semibold text-white transition hover:scale-[1.01] disabled:opacity-50"
+              >
+                {loading ? "Building..." : "Build Product Website"}
+              </button>
+            </div>
+          </section>
+        </FadeIn>
+      )}
+
       <FadeIn delay={120}>
         <section className={sectionClass}>
           <h2 className="admin-section-title">Website appearance</h2>
@@ -245,6 +295,7 @@ export function SiteForm() {
             value={{
               themeId: form.themeId,
               fontPairId: form.fontPairId,
+              layoutId: form.layoutId,
               customAccentColor: form.customAccentColor,
               customButtonColor: form.customButtonColor,
               customBackgroundColor: form.customBackgroundColor,
@@ -484,12 +535,13 @@ export function SiteForm() {
       <FadeIn delay={560}>
       <button
         type="submit"
-        disabled={loading}
+        disabled={loading || !canBuild}
         className="admin-btn-primary w-full rounded-lg py-3.5 text-sm font-semibold text-white transition hover:scale-[1.01] disabled:opacity-50"
       >
         {loading ? "Building your site..." : "Build Product Website"}
       </button>
       </FadeIn>
     </form>
+    </>
   );
 }

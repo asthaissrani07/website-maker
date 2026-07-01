@@ -117,6 +117,7 @@ export async function generateProductSiteWithGroq(
     | "customButtonColor"
     | "customBackgroundColor"
     | "customTextColor"
+    | "layoutId"
   >
 > {
   const client = getClient();

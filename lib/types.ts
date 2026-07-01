@@ -29,6 +29,7 @@ export interface ProductSiteConfig {
   customButtonColor: string;
   customBackgroundColor: string;
   customTextColor: string;
+  layoutId: string;
   createdAt: string;
 }
 

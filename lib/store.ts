@@ -32,6 +32,7 @@ export function withAppearanceDefaults<T extends ProductSiteInput>(
     customButtonColor: site.customButtonColor ?? "",
     customBackgroundColor: site.customBackgroundColor ?? "",
     customTextColor: site.customTextColor ?? "",
+    layoutId: site.layoutId || defaultSiteInput.layoutId,
   };
 }
 

@@ -20,17 +20,12 @@ export default function CreatePage() {
       <FadeIn>
         <div className="mb-8">
           <p className="text-sm leading-relaxed text-slate-600">
-            Describe your product and let Groq AI generate the copy, or edit the
-            fields manually. Layout inspired by{" "}
-            <a
-              href="https://trycorevita.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium text-purple-700 underline decoration-purple-200 hover:text-purple-900"
-            >
-              Corevita
-            </a>
-            .
+            <strong className="font-semibold text-slate-800">Step 1:</strong>{" "}
+            Generate content with Groq AI.{" "}
+            <strong className="font-semibold text-slate-800">Step 2:</strong>{" "}
+            Click <strong className="text-purple-700">Build Product Website</strong>{" "}
+            (appears right after generation, or use the sticky bar at the bottom).
+            You can edit any field before building.
           </p>
         </div>
       </FadeIn>

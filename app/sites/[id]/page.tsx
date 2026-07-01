@@ -5,6 +5,7 @@ import { FadeIn } from "@/components/admin/FadeIn";
 import { formatDisplayDateTime } from "@/lib/format-date";
 import { getProductTheme } from "@/lib/product-themes";
 import { getFontPair } from "@/lib/product-fonts";
+import { getProductLayout } from "@/lib/product-layouts";
 import { getSite } from "@/lib/store";
 
 export default async function SiteDetailPage({
@@ -23,6 +24,7 @@ export default async function SiteDetailPage({
   const previewUrl = `/preview/${id}`;
   const theme = getProductTheme(site.themeId);
   const font = getFontPair(site.fontPairId);
+  const layout = getProductLayout(site.layoutId);
   const customColors = [
     site.customAccentColor && { label: "Accent", value: site.customAccentColor },
     site.customButtonColor && { label: "Button", value: site.customButtonColor },
@@ -81,6 +83,10 @@ export default async function SiteDetailPage({
           <section className="admin-card p-6">
             <h2 className="text-sm font-semibold text-slate-800">Site details</h2>
             <dl className="mt-4 space-y-3 text-sm">
+              <div>
+                <dt className="text-slate-500">Layout</dt>
+                <dd className="font-medium text-purple-700">{layout.name}</dd>
+              </div>
               <div>
                 <dt className="text-slate-500">Theme</dt>
                 <dd className="font-medium text-purple-700">{theme.name}</dd>

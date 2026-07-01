@@ -31,6 +31,7 @@ export function buildSiteConfigFile(config: ProductSiteConfig): string {
     customButtonColor: config.customButtonColor || "",
     customBackgroundColor: config.customBackgroundColor || "",
     customTextColor: config.customTextColor || "",
+    layoutId: config.layoutId || "classic",
   };
 
   return `export const siteConfig = ${JSON.stringify(siteConfig, null, 2)} as const;
@@ -361,6 +362,9 @@ export function ProductSite() {
 
   const fontsPath = path.join(process.cwd(), "lib", "product-fonts.ts");
   out["lib/product-fonts.ts"] = fs.readFileSync(fontsPath, "utf-8");
+
+  const layoutsPath = path.join(process.cwd(), "lib", "product-layouts.ts");
+  out["lib/product-layouts.ts"] = fs.readFileSync(layoutsPath, "utf-8");
 
   const appearancePath = path.join(process.cwd(), "lib", "site-appearance.ts");
   out["lib/site-appearance.ts"] = fs.readFileSync(appearancePath, "utf-8");

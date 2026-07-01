@@ -44,4 +44,5 @@ export const defaultSiteInput: ProductSiteInput = {
   customButtonColor: "",
   customBackgroundColor: "",
   customTextColor: "",
+  layoutId: "classic",
 };

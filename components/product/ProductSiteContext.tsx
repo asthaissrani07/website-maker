@@ -41,6 +41,7 @@ export interface SiteContent {
   customButtonColor: string;
   customBackgroundColor: string;
   customTextColor: string;
+  layoutId: string;
 }
 
 export type ModalType =

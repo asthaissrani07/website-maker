@@ -4,11 +4,13 @@ import { FONT_PAIRS } from "@/lib/product-fonts";
 import { PRODUCT_THEMES } from "@/lib/product-themes";
 import type { ProductSiteInput } from "@/lib/types";
 import { ThemePicker } from "./ThemePicker";
+import { LayoutPicker } from "./LayoutPicker";
 
 type AppearanceFields = Pick<
   ProductSiteInput,
   | "themeId"
   | "fontPairId"
+  | "layoutId"
   | "customAccentColor"
   | "customButtonColor"
   | "customBackgroundColor"
@@ -53,6 +55,19 @@ export function AppearanceCustomizer({ value, onChange }: AppearanceCustomizerPr
         <ThemePicker
           value={value.themeId}
           onChange={(themeId) => onChange("themeId", themeId)}
+        />
+      </div>
+
+      <div>
+        <h3 className="admin-label mb-3 text-sm font-semibold uppercase tracking-wider text-purple-800">
+          Page layout
+        </h3>
+        <p className="mb-4 text-sm text-slate-600">
+          Choose how your homepage hero and sections are arranged.
+        </p>
+        <LayoutPicker
+          value={value.layoutId}
+          onChange={(layoutId) => onChange("layoutId", layoutId)}
         />
       </div>
 
