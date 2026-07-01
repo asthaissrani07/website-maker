@@ -130,14 +130,12 @@ export function SiteForm() {
     }
   }
 
-  const inputClass =
-    "w-full rounded-xl border border-violet-200/80 bg-white/90 px-4 py-2.5 font-body text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100";
-  const labelClass =
-    "mb-1.5 block font-body text-xs font-medium uppercase tracking-wider text-zinc-600";
-  const sectionClass = "glass-card rounded-2xl p-6 transition duration-500";
+  const inputClass = "admin-input";
+  const labelClass = "admin-label";
+  const sectionClass = "admin-card p-6 md:p-8";
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
@@ -145,24 +143,24 @@ export function SiteForm() {
       )}
 
       <FadeIn delay={80}>
-      <section className="rounded-2xl border border-violet-300/40 bg-gradient-to-br from-violet-50/90 via-white/80 to-emerald-50/90 p-6 shadow-sm backdrop-blur-sm">
-        <div className="mb-4 flex items-center gap-2">
-          <span className="rounded-full bg-gradient-to-r from-violet-200 to-emerald-200 px-2.5 py-0.5 font-body text-xs font-medium text-violet-900">
+      <section className="admin-card border-purple-200 bg-gradient-to-br from-purple-50 to-white p-6 md:p-8">
+        <div className="mb-5 flex items-center gap-2">
+          <span className="rounded-full bg-purple-600 px-2.5 py-0.5 text-xs font-semibold text-white">
             Groq AI
           </span>
-          <h2 className="font-display text-lg font-normal text-zinc-900">
+          <h2 className="admin-section-title mb-0">
             Generate website content
           </h2>
         </div>
-        <p className="mb-4 font-body text-sm font-light leading-relaxed text-zinc-600">
+        <p className="admin-section-desc">
           Describe your product and Groq will write the headline, hero copy,
           stats, and all landing-page text. You can edit everything before
           building.
         </p>
-        <div className="grid gap-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <label className={labelClass}>Product name *</label>
+        <div className="admin-form-grid">
+          <div className="admin-form-grid admin-form-grid-2">
+            <div className="admin-form-field">
+              <label className={`${labelClass} admin-label-required`}>Product name</label>
               <input
                 className={inputClass}
                 placeholder="e.g. VitaGlow Serum"
@@ -172,7 +170,7 @@ export function SiteForm() {
                 }
               />
             </div>
-            <div>
+            <div className="admin-form-field">
               <label className={labelClass}>Brand name (optional)</label>
               <input
                 className={inputClass}
@@ -184,8 +182,8 @@ export function SiteForm() {
               />
             </div>
           </div>
-          <div>
-            <label className={labelClass}>Product description *</label>
+          <div className="admin-form-field">
+            <label className={`${labelClass} admin-label-required`}>Product description</label>
             <textarea
               rows={4}
               className={inputClass}
@@ -199,8 +197,8 @@ export function SiteForm() {
               }
             />
           </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
+          <div className="admin-form-grid admin-form-grid-2">
+            <div className="admin-form-field">
               <label className={labelClass}>Price (optional)</label>
               <input
                 className={inputClass}
@@ -211,7 +209,7 @@ export function SiteForm() {
                 }
               />
             </div>
-            <div>
+            <div className="admin-form-field">
               <label className={labelClass}>Contact email (optional)</label>
               <input
                 type="email"
@@ -228,7 +226,7 @@ export function SiteForm() {
             type="button"
             disabled={generating || !aiBrief.productName || !aiBrief.productDescription}
             onClick={handleGenerateWithAI}
-            className="rounded-full bg-gradient-to-r from-violet-600 to-emerald-600 py-3 font-body text-sm font-semibold text-white shadow-md transition hover:scale-[1.01] hover:shadow-lg disabled:opacity-50"
+            className="admin-btn-primary w-full rounded-lg py-3 text-sm font-semibold text-white transition hover:scale-[1.01] disabled:opacity-50"
           >
             {generating ? "Generating with Groq AI..." : "Generate content with AI"}
           </button>
@@ -238,10 +236,8 @@ export function SiteForm() {
 
       <FadeIn delay={120}>
         <section className={sectionClass}>
-          <h2 className="mb-2 font-display text-lg font-normal text-zinc-900">
-            Website appearance
-          </h2>
-          <p className="mb-4 font-body text-sm text-zinc-500">
+          <h2 className="admin-section-title">Website appearance</h2>
+          <p className="admin-section-desc">
             Choose a preset theme, font pairing, and optional custom colors for
             your product website.
           </p>
@@ -261,9 +257,9 @@ export function SiteForm() {
 
       <FadeIn delay={160}>
       <section className={sectionClass}>
-        <h2 className="mb-4 font-display text-lg font-normal text-zinc-900">Brand & Product</h2>
-        <div className="grid gap-4 md:grid-cols-2">
-          <div>
+        <h2 className="admin-section-title">Brand & Product</h2>
+        <div className="admin-form-grid admin-form-grid-2">
+          <div className="admin-form-field">
             <label className={labelClass}>Brand Name</label>
             <input
               required
@@ -272,7 +268,7 @@ export function SiteForm() {
               onChange={(e) => updateField("brandName", e.target.value)}
             />
           </div>
-          <div>
+          <div className="admin-form-field">
             <label className={labelClass}>Product Name</label>
             <input
               required
@@ -281,7 +277,7 @@ export function SiteForm() {
               onChange={(e) => updateField("productName", e.target.value)}
             />
           </div>
-          <div className="md:col-span-2">
+          <div className="admin-form-field md:col-span-2">
             <label className={labelClass}>Tagline</label>
             <input
               className={inputClass}
@@ -289,7 +285,7 @@ export function SiteForm() {
               onChange={(e) => updateField("tagline", e.target.value)}
             />
           </div>
-          <div>
+          <div className="admin-form-field">
             <label className={labelClass}>Price (USD)</label>
             <input
               required
@@ -298,7 +294,7 @@ export function SiteForm() {
               onChange={(e) => updateField("price", e.target.value)}
             />
           </div>
-          <div>
+          <div className="admin-form-field">
             <label className={labelClass}>Shipping Banner Message</label>
             <input
               className={inputClass}
@@ -312,9 +308,9 @@ export function SiteForm() {
 
       <FadeIn delay={240}>
       <section className={sectionClass}>
-        <h2 className="mb-4 font-display text-lg font-normal text-zinc-900">Hero Section</h2>
-        <div className="grid gap-4">
-          <div>
+        <h2 className="admin-section-title">Hero Section</h2>
+        <div className="admin-form-grid">
+          <div className="admin-form-field">
             <label className={labelClass}>Hero Headline</label>
             <textarea
               required
@@ -324,7 +320,7 @@ export function SiteForm() {
               onChange={(e) => updateField("heroHeadline", e.target.value)}
             />
           </div>
-          <div>
+          <div className="admin-form-field">
             <label className={labelClass}>Hero Subtext</label>
             <textarea
               required
@@ -334,8 +330,8 @@ export function SiteForm() {
               onChange={(e) => updateField("heroSubtext", e.target.value)}
             />
           </div>
-          <div className="grid gap-4 md:grid-cols-3">
-            <div>
+          <div className="admin-form-grid admin-form-grid-3">
+            <div className="admin-form-field">
               <label className={labelClass}>CTA Button Text</label>
               <input
                 className={inputClass}
@@ -343,7 +339,7 @@ export function SiteForm() {
                 onChange={(e) => updateField("ctaText", e.target.value)}
               />
             </div>
-            <div>
+            <div className="admin-form-field">
               <label className={labelClass}>Rating (e.g. 4.8)</label>
               <input
                 className={inputClass}
@@ -351,7 +347,7 @@ export function SiteForm() {
                 onChange={(e) => updateField("rating", e.target.value)}
               />
             </div>
-            <div>
+            <div className="admin-form-field">
               <label className={labelClass}>Review Count (e.g. 400+)</label>
               <input
                 className={inputClass}
@@ -366,12 +362,13 @@ export function SiteForm() {
 
       <FadeIn delay={320}>
       <section className={sectionClass}>
-        <h2 className="mb-4 font-display text-lg font-normal text-zinc-900">Product Image</h2>
+        <h2 className="admin-section-title">Product Image</h2>
+        <div className="admin-form-field">
         <input
           type="file"
           accept="image/*"
           onChange={handleImageChange}
-          className="block w-full text-sm text-zinc-600 file:mr-4 file:rounded-md file:border-0 file:bg-gradient-to-r file:from-violet-100 file:to-emerald-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-violet-800 hover:file:from-violet-200 hover:file:to-emerald-200"
+          className="admin-input cursor-pointer file:mr-4 file:cursor-pointer file:rounded-md file:border file:border-purple-200 file:bg-purple-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-purple-800 hover:file:bg-purple-100"
         />
         {form.imageBase64 && (
           <div className="mt-4">
@@ -379,18 +376,19 @@ export function SiteForm() {
             <img
               src={`data:${form.imageMimeType};base64,${form.imageBase64}`}
               alt="Preview"
-              className="h-32 w-32 rounded-lg object-cover"
-            />
+            className="mt-4 h-32 w-32 rounded-lg border border-slate-200 object-cover shadow-sm"
+          />
           </div>
         )}
+        </div>
       </section>
       </FadeIn>
 
       <FadeIn delay={400}>
       <section className={sectionClass}>
-        <h2 className="mb-4 font-display text-lg font-normal text-zinc-900">Results Stats</h2>
-        <div className="grid gap-4 md:grid-cols-2">
-          <div>
+        <h2 className="admin-section-title">Results Stats</h2>
+        <div className="admin-form-grid admin-form-grid-2">
+          <div className="admin-form-field">
             <label className={labelClass}>Stats Section Title</label>
             <input
               className={inputClass}
@@ -398,7 +396,7 @@ export function SiteForm() {
               onChange={(e) => updateField("statsTitle", e.target.value)}
             />
           </div>
-          <div>
+          <div className="admin-form-field">
             <label className={labelClass}>Stats Subtitle</label>
             <input
               className={inputClass}
@@ -411,7 +409,7 @@ export function SiteForm() {
           {form.stats.map((stat, index) => (
             <div
               key={index}
-              className="flex flex-wrap items-end gap-3 rounded-lg border border-violet-100 bg-gradient-to-r from-violet-50/40 to-emerald-50/40 p-4"
+              className="flex flex-wrap items-end gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4"
             >
               <div className="w-24">
                 <label className={labelClass}>%</label>
@@ -449,7 +447,7 @@ export function SiteForm() {
           <button
             type="button"
             onClick={addStat}
-            className="text-sm font-medium text-emerald-700 hover:text-emerald-900"
+            className="text-sm font-medium text-purple-700 hover:text-purple-900"
           >
             + Add stat
           </button>
@@ -459,9 +457,9 @@ export function SiteForm() {
 
       <FadeIn delay={480}>
       <section className={sectionClass}>
-        <h2 className="mb-4 font-display text-lg font-normal text-zinc-900">Contact & Footer</h2>
-        <div className="grid gap-4 md:grid-cols-2">
-          <div>
+        <h2 className="admin-section-title">Contact & Footer</h2>
+        <div className="admin-form-grid admin-form-grid-2">
+          <div className="admin-form-field">
             <label className={labelClass}>Contact Email</label>
             <input
               required
@@ -471,7 +469,7 @@ export function SiteForm() {
               onChange={(e) => updateField("contactEmail", e.target.value)}
             />
           </div>
-          <div>
+          <div className="admin-form-field">
             <label className={labelClass}>Footer Copyright</label>
             <input
               className={inputClass}
@@ -487,7 +485,7 @@ export function SiteForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-full bg-gradient-to-r from-violet-600 to-emerald-600 py-3.5 font-body text-sm font-semibold text-white shadow-md shadow-violet-200/50 transition hover:scale-[1.01] hover:shadow-lg disabled:opacity-50"
+        className="admin-btn-primary w-full rounded-lg py-3.5 text-sm font-semibold text-white transition hover:scale-[1.01] disabled:opacity-50"
       >
         {loading ? "Building your site..." : "Build Product Website"}
       </button>

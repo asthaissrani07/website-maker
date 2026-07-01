@@ -47,7 +47,7 @@ export function AppearanceCustomizer({ value, onChange }: AppearanceCustomizerPr
   return (
     <div className="space-y-8">
       <div>
-        <h3 className="mb-3 font-body text-sm font-semibold uppercase tracking-wider text-violet-700">
+        <h3 className="admin-label mb-3 text-sm font-semibold uppercase tracking-wider text-purple-800">
           Preset theme
         </h3>
         <ThemePicker
@@ -57,7 +57,7 @@ export function AppearanceCustomizer({ value, onChange }: AppearanceCustomizerPr
       </div>
 
       <div>
-        <h3 className="mb-3 font-body text-sm font-semibold uppercase tracking-wider text-violet-700">
+        <h3 className="admin-label mb-3 text-sm font-semibold uppercase tracking-wider text-purple-800">
           Font pairing
         </h3>
         <div className="grid gap-3 sm:grid-cols-2">
@@ -70,17 +70,17 @@ export function AppearanceCustomizer({ value, onChange }: AppearanceCustomizerPr
                 onClick={() => onChange("fontPairId", font.id)}
                 className={`rounded-xl border p-4 text-left transition ${
                   selected
-                    ? "border-emerald-500 bg-emerald-50 ring-2 ring-emerald-300"
-                    : "border-violet-200/80 bg-white hover:border-violet-300"
+                    ? "border-purple-500 bg-purple-50 ring-2 ring-purple-200"
+                    : "border-slate-300 bg-white hover:border-purple-300"
                 }`}
               >
-                <p
-                  className="text-lg font-semibold text-zinc-900"
+                <div
+                  className="text-lg font-semibold text-slate-900"
                   style={{ fontFamily: font.display }}
                 >
                   {font.name}
-                </p>
-                <p className="mt-1 text-xs text-zinc-500">{font.description}</p>
+                </div>
+                <div className="mt-1 text-xs text-slate-600">{font.description}</div>
               </button>
             );
           })}
@@ -89,28 +89,26 @@ export function AppearanceCustomizer({ value, onChange }: AppearanceCustomizerPr
 
       <div>
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <h3 className="font-body text-sm font-semibold uppercase tracking-wider text-violet-700">
+          <h3 className="admin-label text-sm font-semibold uppercase tracking-wider text-purple-800">
             Custom colors
           </h3>
           {hasCustomColors && (
             <button
               type="button"
               onClick={clearColors}
-              className="text-xs font-medium text-violet-600 hover:text-violet-800"
+              className="text-xs font-medium text-purple-700 hover:text-purple-900"
             >
               Reset to theme defaults
             </button>
           )}
         </div>
-        <p className="mb-4 text-sm text-zinc-500">
+        <p className="mb-4 text-sm text-slate-600">
           Optional — leave blank to use colors from the preset theme above.
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
           {COLOR_FIELDS.map(({ key, label, hint }) => (
-            <div key={key}>
-              <label className="mb-1.5 block text-sm font-medium text-zinc-700">
-                {label}
-              </label>
+            <div key={key} className="admin-form-field">
+              <label className="admin-label">{label}</label>
               <div className="flex items-center gap-3">
                 <input
                   type="color"
@@ -120,17 +118,17 @@ export function AppearanceCustomizer({ value, onChange }: AppearanceCustomizerPr
                     "#8b6914"
                   }
                   onChange={(e) => onChange(key, e.target.value)}
-                  className="h-10 w-14 cursor-pointer rounded-lg border border-violet-200 bg-white p-1"
+                  className="h-10 w-14 cursor-pointer rounded-lg border border-slate-300 bg-white p-1"
                 />
                 <input
                   type="text"
                   placeholder="#8b6914"
                   value={value[key] as string}
                   onChange={(e) => onChange(key, e.target.value)}
-                  className="flex-1 rounded-lg border border-violet-200 bg-white px-3 py-2 font-mono text-sm text-zinc-900 outline-none focus:border-violet-400"
+                  className="admin-input flex-1 font-mono"
                 />
               </div>
-              <p className="mt-1 text-xs text-zinc-400">{hint}</p>
+              <div className="text-xs text-slate-500">{hint}</div>
             </div>
           ))}
         </div>
